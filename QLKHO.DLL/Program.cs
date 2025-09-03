@@ -1,0 +1,1 @@
+﻿namespace QLKHO.DLL { }

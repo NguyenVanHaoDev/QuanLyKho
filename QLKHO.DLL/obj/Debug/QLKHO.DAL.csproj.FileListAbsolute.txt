@@ -1,0 +1,14 @@
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\QLKHO.DLL.dll.config
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\QLKHO.DLL.dll
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\QLKHO.DLL.pdb
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\EntityFramework.dll
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\EntityFramework.SqlServer.dll
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\EntityFramework.xml
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\EntityFramework.SqlServer.xml
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DAL.csproj.AssemblyReference.cache
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DLL.Properties.Resources.resources
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DAL.csproj.GenerateResource.cache
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DAL.csproj.CoreCompileInputs.cache
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DAL.csproj.Up2Date
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DLL.dll
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DLL.pdb

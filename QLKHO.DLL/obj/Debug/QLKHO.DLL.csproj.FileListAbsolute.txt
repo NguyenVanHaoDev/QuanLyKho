@@ -1,0 +1,9 @@
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\QLKHO.DLL.exe.config
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\QLKHO.DLL.exe
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\bin\Debug\QLKHO.DLL.pdb
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DLL.csproj.AssemblyReference.cache
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DLL.Properties.Resources.resources
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DLL.csproj.GenerateResource.cache
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DLL.csproj.CoreCompileInputs.cache
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DLL.exe
+D:\E2308002\cource\C#\warehouse_management\QLKHO.DLL\obj\Debug\QLKHO.DLL.pdb
