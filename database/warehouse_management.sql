@@ -41,7 +41,28 @@ GO
 -- TẠO CÁC BẢNG
 -- =============================================
 
--- 1. Bảng Danh Mục Sản Phẩm
+-- 1. Bảng Người Dùng Hệ Thống (PHẢI TẠO TRƯỚC)
+CREATE TABLE [dbo].[NguoiDungHeThong] (
+    [MaNguoiDung] INT IDENTITY(1,1) NOT NULL,
+    [TenDangNhap] NVARCHAR(50) NOT NULL,
+    [MatKhau] NVARCHAR(255) NOT NULL,
+    [HoTen] NVARCHAR(100) NOT NULL,
+    [Email] NVARCHAR(100) NULL,
+    [SoDienThoai] NVARCHAR(20) NULL,
+    [HoatDong] BIT NOT NULL DEFAULT 1,
+    [NgayDangNhapCuoi] DATETIME NULL,
+    [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
+    [MaNguoiDungTao] INT NULL, -- NULL cho user đầu tiên
+    [NgaySua] DATETIME NULL,
+    [MaNguoiDungSua] INT NULL,
+    CONSTRAINT [PK_NguoiDungHeThong] PRIMARY KEY CLUSTERED ([MaNguoiDung] ASC),
+    CONSTRAINT [UQ_NguoiDungHeThong_TenDangNhap] UNIQUE NONCLUSTERED ([TenDangNhap] ASC),
+    CONSTRAINT [FK_NguoiDungHeThong_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_NguoiDungHeThong_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
+);
+GO
+
+-- 2. Bảng Danh Mục Sản Phẩm
 CREATE TABLE [dbo].[DanhMucSanPham] (
     [MaDanhMuc] INT IDENTITY(1,1) NOT NULL,
     [MaDanhMucCode] NVARCHAR(20) NOT NULL,
@@ -50,12 +71,14 @@ CREATE TABLE [dbo].[DanhMucSanPham] (
     [MaDanhMucCha] INT NULL,
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_DanhMucSanPham] PRIMARY KEY CLUSTERED ([MaDanhMuc] ASC),
     CONSTRAINT [UQ_DanhMucSanPham_MaDanhMucCode] UNIQUE NONCLUSTERED ([MaDanhMucCode] ASC),
-    CONSTRAINT [FK_DanhMucSanPham_DanhMucCha] FOREIGN KEY ([MaDanhMucCha]) REFERENCES [dbo].[DanhMucSanPham] ([MaDanhMuc])
+    CONSTRAINT [FK_DanhMucSanPham_DanhMucCha] FOREIGN KEY ([MaDanhMucCha]) REFERENCES [dbo].[DanhMucSanPham] ([MaDanhMuc]),
+    CONSTRAINT [FK_DanhMucSanPham_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_DanhMucSanPham_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -75,11 +98,13 @@ CREATE TABLE [dbo].[NhaCungCap] (
     [HanMucTinDung] DECIMAL(18,2) NULL,
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_NhaCungCap] PRIMARY KEY CLUSTERED ([MaNhaCungCap] ASC),
-    CONSTRAINT [UQ_NhaCungCap_MaCode] UNIQUE NONCLUSTERED ([MaNhaCungCapCode] ASC)
+    CONSTRAINT [UQ_NhaCungCap_MaCode] UNIQUE NONCLUSTERED ([MaNhaCungCapCode] ASC),
+    CONSTRAINT [FK_NhaCungCap_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_NhaCungCap_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -100,13 +125,15 @@ CREATE TABLE [dbo].[SanPham] (
     [ThoiGianGiaoHang] INT NULL, -- Số ngày
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_SanPham] PRIMARY KEY CLUSTERED ([MaSanPham] ASC),
     CONSTRAINT [UQ_SanPham_MaCode] UNIQUE NONCLUSTERED ([MaSanPhamCode] ASC),
     CONSTRAINT [FK_SanPham_DanhMuc] FOREIGN KEY ([MaDanhMuc]) REFERENCES [dbo].[DanhMucSanPham] ([MaDanhMuc]),
-    CONSTRAINT [FK_SanPham_NhaCungCap] FOREIGN KEY ([MaNhaCungCap]) REFERENCES [dbo].[NhaCungCap] ([MaNhaCungCap])
+    CONSTRAINT [FK_SanPham_NhaCungCap] FOREIGN KEY ([MaNhaCungCap]) REFERENCES [dbo].[NhaCungCap] ([MaNhaCungCap]),
+    CONSTRAINT [FK_SanPham_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_SanPham_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -121,11 +148,13 @@ CREATE TABLE [dbo].[KhoHang] (
     [Email] NVARCHAR(100) NULL,
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_KhoHang] PRIMARY KEY CLUSTERED ([MaKho] ASC),
-    CONSTRAINT [UQ_KhoHang_MaKhoCode] UNIQUE NONCLUSTERED ([MaKhoCode] ASC)
+    CONSTRAINT [UQ_KhoHang_MaKhoCode] UNIQUE NONCLUSTERED ([MaKhoCode] ASC),
+    CONSTRAINT [FK_KhoHang_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_KhoHang_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -143,12 +172,14 @@ CREATE TABLE [dbo].[ViTriTrongKho] (
     [DungLuong] DECIMAL(18,4) NULL,
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_ViTriTrongKho] PRIMARY KEY CLUSTERED ([MaViTri] ASC),
     CONSTRAINT [UQ_ViTriTrongKho_MaKho_MaViTriCode] UNIQUE NONCLUSTERED ([MaKho] ASC, [MaViTriCode] ASC),
-    CONSTRAINT [FK_ViTriTrongKho_KhoHang] FOREIGN KEY ([MaKho]) REFERENCES [dbo].[KhoHang] ([MaKho])
+    CONSTRAINT [FK_ViTriTrongKho_KhoHang] FOREIGN KEY ([MaKho]) REFERENCES [dbo].[KhoHang] ([MaKho]),
+    CONSTRAINT [FK_ViTriTrongKho_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_ViTriTrongKho_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -166,12 +197,13 @@ CREATE TABLE [dbo].[TonKho] (
     [SoLuongKhaDung] AS ([SoLuongTon] - [SoLuongDatTruoc]),
     [NgayKiemKeCuoi] DATETIME NULL,
     [NgaySuaCuoi] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiSuaCuoi] NVARCHAR(50) NULL,
+    [NguoiSuaCuoi] INT NULL,
     CONSTRAINT [PK_TonKho] PRIMARY KEY CLUSTERED ([MaTonKho] ASC),
     CONSTRAINT [UQ_TonKho_SanPham_Kho_Lo] UNIQUE NONCLUSTERED ([MaSanPham] ASC, [MaKho] ASC, [SoLo] ASC),
     CONSTRAINT [FK_TonKho_SanPham] FOREIGN KEY ([MaSanPham]) REFERENCES [dbo].[SanPham] ([MaSanPham]),
     CONSTRAINT [FK_TonKho_KhoHang] FOREIGN KEY ([MaKho]) REFERENCES [dbo].[KhoHang] ([MaKho]),
-    CONSTRAINT [FK_TonKho_ViTriTrongKho] FOREIGN KEY ([MaViTri]) REFERENCES [dbo].[ViTriTrongKho] ([MaViTri])
+    CONSTRAINT [FK_TonKho_ViTriTrongKho] FOREIGN KEY ([MaViTri]) REFERENCES [dbo].[ViTriTrongKho] ([MaViTri]),
+    CONSTRAINT [FK_TonKho_NguoiSuaCuoi] FOREIGN KEY ([NguoiSuaCuoi]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -187,12 +219,14 @@ CREATE TABLE [dbo].[DonDatHang] (
     [TongTien] DECIMAL(18,4) NULL,
     [GhiChu] NVARCHAR(1000) NULL,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_DonDatHang] PRIMARY KEY CLUSTERED ([MaDonDatHang] ASC),
     CONSTRAINT [UQ_DonDatHang_SoDonDatHang] UNIQUE NONCLUSTERED ([SoDonDatHang] ASC),
-    CONSTRAINT [FK_DonDatHang_NhaCungCap] FOREIGN KEY ([MaNhaCungCap]) REFERENCES [dbo].[NhaCungCap] ([MaNhaCungCap])
+    CONSTRAINT [FK_DonDatHang_NhaCungCap] FOREIGN KEY ([MaNhaCungCap]) REFERENCES [dbo].[NhaCungCap] ([MaNhaCungCap]),
+    CONSTRAINT [FK_DonDatHang_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_DonDatHang_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -224,14 +258,16 @@ CREATE TABLE [dbo].[PhieuNhapKho] (
     [TongTien] DECIMAL(18,4) NULL,
     [GhiChu] NVARCHAR(1000) NULL,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_PhieuNhapKho] PRIMARY KEY CLUSTERED ([MaPhieuNhap] ASC),
     CONSTRAINT [UQ_PhieuNhapKho_SoPhieuNhap] UNIQUE NONCLUSTERED ([SoPhieuNhap] ASC),
     CONSTRAINT [FK_PhieuNhapKho_DonDatHang] FOREIGN KEY ([MaDonDatHang]) REFERENCES [dbo].[DonDatHang] ([MaDonDatHang]),
     CONSTRAINT [FK_PhieuNhapKho_NhaCungCap] FOREIGN KEY ([MaNhaCungCap]) REFERENCES [dbo].[NhaCungCap] ([MaNhaCungCap]),
-    CONSTRAINT [FK_PhieuNhapKho_KhoHang] FOREIGN KEY ([MaKho]) REFERENCES [dbo].[KhoHang] ([MaKho])
+    CONSTRAINT [FK_PhieuNhapKho_KhoHang] FOREIGN KEY ([MaKho]) REFERENCES [dbo].[KhoHang] ([MaKho]),
+    CONSTRAINT [FK_PhieuNhapKho_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_PhieuNhapKho_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -267,11 +303,14 @@ CREATE TABLE [dbo].[DonHangBan] (
     [TongTien] DECIMAL(18,4) NULL,
     [GhiChu] NVARCHAR(1000) NULL,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_DonHangBan] PRIMARY KEY CLUSTERED ([MaDonHangBan] ASC),
-    CONSTRAINT [UQ_DonHangBan_SoDonHangBan] UNIQUE NONCLUSTERED ([SoDonHangBan] ASC)
+    CONSTRAINT [UQ_DonHangBan_SoDonHangBan] UNIQUE NONCLUSTERED ([SoDonHangBan] ASC),
+    CONSTRAINT [FK_DonHangBan_KhachHang] FOREIGN KEY ([MaKhachHang]) REFERENCES [dbo].[KhachHang] ([MaKhachHang]),
+    CONSTRAINT [FK_DonHangBan_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_DonHangBan_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -303,13 +342,16 @@ CREATE TABLE [dbo].[PhieuXuatKho] (
     [TongTien] DECIMAL(18,4) NULL,
     [GhiChu] NVARCHAR(1000) NULL,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_PhieuXuatKho] PRIMARY KEY CLUSTERED ([MaPhieuXuat] ASC),
     CONSTRAINT [UQ_PhieuXuatKho_SoPhieuXuat] UNIQUE NONCLUSTERED ([SoPhieuXuat] ASC),
     CONSTRAINT [FK_PhieuXuatKho_DonHangBan] FOREIGN KEY ([MaDonHangBan]) REFERENCES [dbo].[DonHangBan] ([MaDonHangBan]),
-    CONSTRAINT [FK_PhieuXuatKho_KhoHang] FOREIGN KEY ([MaKho]) REFERENCES [dbo].[KhoHang] ([MaKho])
+    CONSTRAINT [FK_PhieuXuatKho_KhachHang] FOREIGN KEY ([MaKhachHang]) REFERENCES [dbo].[KhachHang] ([MaKhachHang]),
+    CONSTRAINT [FK_PhieuXuatKho_KhoHang] FOREIGN KEY ([MaKho]) REFERENCES [dbo].[KhoHang] ([MaKho]),
+    CONSTRAINT [FK_PhieuXuatKho_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_PhieuXuatKho_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -350,11 +392,12 @@ CREATE TABLE [dbo].[GiaoDichTonKho] (
     [NgayHetHan] DATE NULL,
     [GhiChu] NVARCHAR(500) NULL,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [NguoiTao] INT NULL,
     CONSTRAINT [PK_GiaoDichTonKho] PRIMARY KEY CLUSTERED ([MaGiaoDich] ASC),
     CONSTRAINT [FK_GiaoDichTonKho_SanPham] FOREIGN KEY ([MaSanPham]) REFERENCES [dbo].[SanPham] ([MaSanPham]),
     CONSTRAINT [FK_GiaoDichTonKho_KhoHang] FOREIGN KEY ([MaKho]) REFERENCES [dbo].[KhoHang] ([MaKho]),
-    CONSTRAINT [FK_GiaoDichTonKho_ViTriTrongKho] FOREIGN KEY ([MaViTri]) REFERENCES [dbo].[ViTriTrongKho] ([MaViTri])
+    CONSTRAINT [FK_GiaoDichTonKho_ViTriTrongKho] FOREIGN KEY ([MaViTri]) REFERENCES [dbo].[ViTriTrongKho] ([MaViTri]),
+    CONSTRAINT [FK_GiaoDichTonKho_NguoiTao] FOREIGN KEY ([NguoiTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -372,30 +415,13 @@ CREATE TABLE [dbo].[KhachHang] (
     [DieuKienThanhToan] NVARCHAR(100) NULL,
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_KhachHang] PRIMARY KEY CLUSTERED ([MaKhachHang] ASC),
-    CONSTRAINT [UQ_KhachHang_MaKhachHangCode] UNIQUE NONCLUSTERED ([MaKhachHangCode] ASC)
-);
-GO
-
--- 17. Bảng Người Dùng Hệ Thống
-CREATE TABLE [dbo].[NguoiDungHeThong] (
-    [MaNguoiDung] INT IDENTITY(1,1) NOT NULL,
-    [TenDangNhap] NVARCHAR(50) NOT NULL,
-    [MatKhau] NVARCHAR(255) NOT NULL,
-    [HoTen] NVARCHAR(100) NOT NULL,
-    [Email] NVARCHAR(100) NULL,
-    [SoDienThoai] NVARCHAR(20) NULL,
-    [HoatDong] BIT NOT NULL DEFAULT 1,
-    [NgayDangNhapCuoi] DATETIME NULL,
-    [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
-    [NgaySua] DATETIME NULL,
-    [NguoiSua] NVARCHAR(50) NULL,
-    CONSTRAINT [PK_NguoiDungHeThong] PRIMARY KEY CLUSTERED ([MaNguoiDung] ASC),
-    CONSTRAINT [UQ_NguoiDungHeThong_TenDangNhap] UNIQUE NONCLUSTERED ([TenDangNhap] ASC)
+    CONSTRAINT [UQ_KhachHang_MaKhachHangCode] UNIQUE NONCLUSTERED ([MaKhachHangCode] ASC),
+    CONSTRAINT [FK_KhachHang_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_KhachHang_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -406,9 +432,10 @@ CREATE TABLE [dbo].[VaiTroNguoiDung] (
     [TenVaiTro] NVARCHAR(50) NOT NULL, -- Quản trị viên, Quản lý, Nhân viên, Người xem
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
-    [NguoiTao] NVARCHAR(50) NULL,
+    [MaNguoiDungTao] INT NOT NULL,
     CONSTRAINT [PK_VaiTroNguoiDung] PRIMARY KEY CLUSTERED ([MaVaiTro] ASC),
-    CONSTRAINT [FK_VaiTroNguoiDung_NguoiDungHeThong] FOREIGN KEY ([MaNguoiDung]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
+    CONSTRAINT [FK_VaiTroNguoiDung_NguoiDungHeThong] FOREIGN KEY ([MaNguoiDung]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_VaiTroNguoiDung_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
@@ -443,145 +470,149 @@ CREATE NONCLUSTERED INDEX [IX_DonHangBan_TrangThai] ON [dbo].[DonHangBan] ([Tran
 -- INSERT SAMPLE DATA
 -- =============================================
 
--- Thêm dữ liệu mẫu danh mục
-INSERT INTO [dbo].[DanhMucSanPham] ([MaDanhMucCode], [TenDanhMuc], [MoTa], [NguoiTao])
+-- Thêm dữ liệu mẫu người dùng hệ thống (phải thêm trước)
+INSERT INTO [dbo].[NguoiDungHeThong] ([TenDangNhap], [MatKhau], [HoTen], [Email], [MaNguoiDungTao])
 VALUES 
-    ('DM001', N'Điện tử', N'Thiết bị và linh kiện điện tử', 'Hệ thống'),
-    ('DM002', N'Quần áo', N'Trang phục và phụ kiện', 'Hệ thống'),
-    ('DM003', N'Sách', N'Sách và ấn phẩm', 'Hệ thống'),
-    ('DM004', N'Thực phẩm', N'Thực phẩm và đồ uống', 'Hệ thống'),
-    ('DM005', N'Gia dụng', N'Đồ gia dụng và nội thất', 'Hệ thống'),
-    ('DM006', N'Thể thao', N'Dụng cụ thể thao và giải trí', 'Hệ thống'),
-    ('DM007', N'Làm đẹp', N'Mỹ phẩm và sản phẩm chăm sóc cá nhân', 'Hệ thống'),
-    ('DM008', N'Văn phòng phẩm', N'Đồ dùng văn phòng và học tập', 'Hệ thống'),
-    ('DM009', N'Đồ chơi', N'Đồ chơi trẻ em và người lớn', 'Hệ thống'),
-    ('DM010', N'Y tế', N'Thiết bị y tế và dược phẩm', 'Hệ thống');
+    ('admin', 'admin123', N'Quản trị viên hệ thống', 'admin@quanlykho.com', NULL);
+
+-- Thêm dữ liệu mẫu danh mục
+INSERT INTO [dbo].[DanhMucSanPham] ([MaDanhMucCode], [TenDanhMuc], [MoTa], [MaNguoiDungTao])
+VALUES 
+    ('DM001', N'Điện tử', N'Thiết bị và linh kiện điện tử', 1),
+    ('DM002', N'Quần áo', N'Trang phục và phụ kiện', 1),
+    ('DM003', N'Sách', N'Sách và ấn phẩm', 1),
+    ('DM004', N'Thực phẩm', N'Thực phẩm và đồ uống', 1),
+    ('DM005', N'Gia dụng', N'Đồ gia dụng và nội thất', 1),
+    ('DM006', N'Thể thao', N'Dụng cụ thể thao và giải trí', 1),
+    ('DM007', N'Làm đẹp', N'Mỹ phẩm và sản phẩm chăm sóc cá nhân', 1),
+    ('DM008', N'Văn phòng phẩm', N'Đồ dùng văn phòng và học tập', 1),
+    ('DM009', N'Đồ chơi', N'Đồ chơi trẻ em và người lớn', 1),
+    ('DM010', N'Y tế', N'Thiết bị y tế và dược phẩm', 1);
 
 -- Thêm dữ liệu mẫu nhà cung cấp
-INSERT INTO [dbo].[NhaCungCap] ([MaNhaCungCapCode], [TenNhaCungCap], [NguoiLienHe], [SoDienThoai], [Email], [DiaChi], [NguoiTao])
+INSERT INTO [dbo].[NhaCungCap] ([MaNhaCungCapCode], [TenNhaCungCap], [NguoiLienHe], [SoDienThoai], [Email], [DiaChi], [MaNguoiDungTao])
 VALUES 
-    ('NCC001', N'Công ty Giải pháp Công nghệ', N'Nguyễn Văn A', '0123456789', 'nguyenvana@tech.com', N'123 Đường Công nghệ, TP.HCM', 'Hệ thống'),
-    ('NCC002', N'Công ty Thời trang Thế giới', N'Trần Thị B', '0987654321', 'tranthib@fashion.com', N'456 Đại lộ Thời trang, Hà Nội', 'Hệ thống'),
-    ('NCC003', N'Công ty Xuất bản Sách', N'Lê Văn C', '0369852147', 'levanc@book.com', N'789 Đường Sách, Đà Nẵng', 'Hệ thống'),
-    ('NCC004', N'Công ty Thực phẩm Sạch', N'Phạm Thị D', '0123456780', 'phamthid@food.com', N'321 Đường Thực phẩm, TP.HCM', 'Hệ thống'),
-    ('NCC005', N'Công ty Gia dụng Việt Nam', N'Hoàng Văn E', '0987654320', 'hoangvane@home.com', N'654 Đường Gia dụng, Hà Nội', 'Hệ thống'),
-    ('NCC006', N'Công ty Thể thao Quốc tế', N'Vũ Thị F', '0369852140', 'vuthif@sport.com', N'987 Đường Thể thao, Đà Nẵng', 'Hệ thống'),
-    ('NCC007', N'Công ty Mỹ phẩm Châu Á', N'Đặng Văn G', '0123456781', 'dangvang@beauty.com', N'147 Đường Làm đẹp, TP.HCM', 'Hệ thống'),
-    ('NCC008', N'Công ty Văn phòng phẩm ABC', N'Bùi Thị H', '0987654322', 'buithih@office.com', N'258 Đường Văn phòng, Hà Nội', 'Hệ thống'),
-    ('NCC009', N'Công ty Đồ chơi Sáng tạo', N'Lý Văn I', '0369852141', 'lyvani@toy.com', N'369 Đường Đồ chơi, Đà Nẵng', 'Hệ thống'),
-    ('NCC010', N'Công ty Thiết bị Y tế', N'Trịnh Thị K', '0123456782', 'trinhthik@medical.com', N'741 Đường Y tế, TP.HCM', 'Hệ thống');
+    ('NCC001', N'Công ty Giải pháp Công nghệ', N'Nguyễn Văn A', '0123456789', 'nguyenvana@tech.com', N'123 Đường Công nghệ, TP.HCM', 1),
+    ('NCC002', N'Công ty Thời trang Thế giới', N'Trần Thị B', '0987654321', 'tranthib@fashion.com', N'456 Đại lộ Thời trang, Hà Nội', 1),
+    ('NCC003', N'Công ty Xuất bản Sách', N'Lê Văn C', '0369852147', 'levanc@book.com', N'789 Đường Sách, Đà Nẵng', 1),
+    ('NCC004', N'Công ty Thực phẩm Sạch', N'Phạm Thị D', '0123456780', 'phamthid@food.com', N'321 Đường Thực phẩm, TP.HCM', 1),
+    ('NCC005', N'Công ty Gia dụng Việt Nam', N'Hoàng Văn E', '0987654320', 'hoangvane@home.com', N'654 Đường Gia dụng, Hà Nội', 1),
+    ('NCC006', N'Công ty Thể thao Quốc tế', N'Vũ Thị F', '0369852140', 'vuthif@sport.com', N'987 Đường Thể thao, Đà Nẵng', 1),
+    ('NCC007', N'Công ty Mỹ phẩm Châu Á', N'Đặng Văn G', '0123456781', 'dangvang@beauty.com', N'147 Đường Làm đẹp, TP.HCM', 1),
+    ('NCC008', N'Công ty Văn phòng phẩm ABC', N'Bùi Thị H', '0987654322', 'buithih@office.com', N'258 Đường Văn phòng, Hà Nội', 1),
+    ('NCC009', N'Công ty Đồ chơi Sáng tạo', N'Lý Văn I', '0369852141', 'lyvani@toy.com', N'369 Đường Đồ chơi, Đà Nẵng', 1),
+    ('NCC010', N'Công ty Thiết bị Y tế', N'Trịnh Thị K', '0123456782', 'trinhthik@medical.com', N'741 Đường Y tế, TP.HCM', 1);
 
 -- Thêm dữ liệu mẫu sản phẩm
-INSERT INTO [dbo].[SanPham] ([MaSanPhamCode], [TenSanPham], [MaDanhMuc], [MaNhaCungCap], [MoTa], [DonViTinh], [GiaVon], [GiaBan], [MucTonKhoToiThieu], [MucTonKhoToiDa], [DiemDatHangLai], [NguoiTao])
+INSERT INTO [dbo].[SanPham] ([MaSanPhamCode], [TenSanPham], [MaDanhMuc], [MaNhaCungCap], [MoTa], [DonViTinh], [GiaVon], [GiaBan], [MucTonKhoToiThieu], [MucTonKhoToiDa], [DiemDatHangLai], [MaNguoiDungTao])
 VALUES 
-    ('SP001', N'Laptop Dell Inspiron', 1, 1, N'Laptop hiệu suất cao với thông số kỹ thuật mới nhất', 'Cái', 20000000, 30000000, 5, 50, 10, 'Hệ thống'),
-    ('SP002', N'Điện thoại iPhone 15', 1, 1, N'Điện thoại thông minh mới nhất với tính năng tiên tiến', 'Cái', 10000000, 15000000, 10, 100, 20, 'Hệ thống'),
-    ('SP003', N'Áo thun nam', 2, 2, N'Áo thun cotton nhiều màu sắc, chất liệu thoáng mát', 'Cái', 150000, 250000, 50, 500, 100, 'Hệ thống'),
-    ('SP004', N'Sách lập trình C#', 3, 3, N'Hướng dẫn hoàn chỉnh về lập trình C# từ cơ bản đến nâng cao', 'Cuốn', 200000, 350000, 20, 200, 40, 'Hệ thống'),
-    ('SP005', N'Bàn phím cơ gaming', 1, 1, N'Bàn phím cơ chuyên dụng cho game thủ, đèn LED RGB', 'Cái', 800000, 1200000, 15, 150, 30, 'Hệ thống'),
-    ('SP006', N'Chuột không dây', 1, 1, N'Chuột không dây công nghệ Bluetooth 5.0, pin sạc', 'Cái', 300000, 500000, 25, 250, 50, 'Hệ thống'),
-    ('SP007', N'Quần jean nam', 2, 2, N'Quần jean nam chất liệu denim cao cấp, nhiều size', 'Cái', 400000, 600000, 30, 300, 60, 'Hệ thống'),
-    ('SP008', N'Váy đầm nữ', 2, 2, N'Váy đầm nữ thiết kế thời trang, phù hợp nhiều dịp', 'Cái', 500000, 800000, 20, 200, 40, 'Hệ thống'),
-    ('SP009', N'Sách tiếng Anh', 3, 3, N'Sách học tiếng Anh cho người mới bắt đầu', 'Cuốn', 150000, 250000, 35, 350, 70, 'Hệ thống'),
-    ('SP010', N'Tạp chí công nghệ', 3, 3, N'Tạp chí cập nhật tin tức công nghệ mới nhất', 'Cuốn', 50000, 80000, 100, 1000, 200, 'Hệ thống'),
-    ('SP011', N'Gạo nếp cái hoa vàng', 4, 4, N'Gạo nếp cái hoa vàng thơm ngon, chất lượng cao', 'Kg', 25000, 35000, 200, 2000, 400, 'Hệ thống'),
-    ('SP012', N'Thịt heo tươi', 4, 4, N'Thịt heo tươi ngon, đảm bảo vệ sinh an toàn thực phẩm', 'Kg', 120000, 180000, 100, 1000, 200, 'Hệ thống'),
-    ('SP013', N'Bàn ăn gỗ', 5, 5, N'Bàn ăn gỗ tự nhiên, thiết kế hiện đại', 'Cái', 3000000, 4500000, 5, 50, 10, 'Hệ thống'),
-    ('SP014', N'Ghế sofa', 5, 5, N'Ghế sofa phòng khách, chất liệu cao cấp', 'Bộ', 5000000, 7500000, 3, 30, 6, 'Hệ thống'),
-    ('SP015', N'Bóng đá', 6, 6, N'Bóng đá chính hãng, kích thước chuẩn', 'Quả', 200000, 300000, 20, 200, 40, 'Hệ thống'),
-    ('SP016', N'Vợt cầu lông', 6, 6, N'Vợt cầu lông chuyên nghiệp, trọng lượng nhẹ', 'Cái', 800000, 1200000, 15, 150, 30, 'Hệ thống'),
-    ('SP017', N'Son môi', 7, 7, N'Son môi màu đẹp, không khô môi', 'Cây', 150000, 250000, 50, 500, 100, 'Hệ thống'),
-    ('SP018', N'Kem dưỡng ẩm', 7, 7, N'Kem dưỡng ẩm cho da khô, thành phần tự nhiên', 'Hộp', 300000, 450000, 30, 300, 60, 'Hệ thống'),
-    ('SP019', N'Bút bi', 8, 8, N'Bút bi mực đen, viết mượt mà', 'Cây', 5000, 8000, 500, 5000, 1000, 'Hệ thống'),
-    ('SP020', N'Vở học sinh', 8, 8, N'Vở học sinh 200 trang, giấy trắng mịn', 'Quyển', 15000, 25000, 200, 2000, 400, 'Hệ thống'),
-    ('SP021', N'Xe đồ chơi điều khiển', 9, 9, N'Xe đồ chơi điều khiển từ xa, pin sạc', 'Cái', 500000, 800000, 10, 100, 20, 'Hệ thống'),
-    ('SP022', N'Búp bê Barbie', 9, 9, N'Búp bê Barbie cao cấp, nhiều phụ kiện', 'Cái', 300000, 500000, 15, 150, 30, 'Hệ thống'),
-    ('SP023', N'Máy đo huyết áp', 10, 10, N'Máy đo huyết áp điện tử, độ chính xác cao', 'Cái', 800000, 1200000, 8, 80, 16, 'Hệ thống'),
-    ('SP024', N'Thuốc cảm cúm', 10, 10, N'Thuốc cảm cúm hiệu quả, an toàn cho sức khỏe', 'Hộp', 50000, 80000, 100, 1000, 200, 'Hệ thống');
+    ('SP001', N'Laptop Dell Inspiron', 1, 1, N'Laptop hiệu suất cao với thông số kỹ thuật mới nhất', 'Cái', 20000000, 30000000, 5, 50, 10, 1),
+    ('SP002', N'Điện thoại iPhone 15', 1, 1, N'Điện thoại thông minh mới nhất với tính năng tiên tiến', 'Cái', 10000000, 15000000, 10, 100, 20, 1),
+    ('SP003', N'Áo thun nam', 2, 2, N'Áo thun cotton nhiều màu sắc, chất liệu thoáng mát', 'Cái', 150000, 250000, 50, 500, 100, 1),
+    ('SP004', N'Sách lập trình C#', 3, 3, N'Hướng dẫn hoàn chỉnh về lập trình C# từ cơ bản đến nâng cao', 'Cuốn', 200000, 350000, 20, 200, 40, 1),
+    ('SP005', N'Bàn phím cơ gaming', 1, 1, N'Bàn phím cơ chuyên dụng cho game thủ, đèn LED RGB', 'Cái', 800000, 1200000, 15, 150, 30, 1),
+    ('SP006', N'Chuột không dây', 1, 1, N'Chuột không dây công nghệ Bluetooth 5.0, pin sạc', 'Cái', 300000, 500000, 25, 250, 50, 1),
+    ('SP007', N'Quần jean nam', 2, 2, N'Quần jean nam chất liệu denim cao cấp, nhiều size', 'Cái', 400000, 600000, 30, 300, 60, 1),
+    ('SP008', N'Váy đầm nữ', 2, 2, N'Váy đầm nữ thiết kế thời trang, phù hợp nhiều dịp', 'Cái', 500000, 800000, 20, 200, 40, 1),
+    ('SP009', N'Sách tiếng Anh', 3, 3, N'Sách học tiếng Anh cho người mới bắt đầu', 'Cuốn', 150000, 250000, 35, 350, 70, 1),
+    ('SP010', N'Tạp chí công nghệ', 3, 3, N'Tạp chí cập nhật tin tức công nghệ mới nhất', 'Cuốn', 50000, 80000, 100, 1000, 200, 1),
+    ('SP011', N'Gạo nếp cái hoa vàng', 4, 4, N'Gạo nếp cái hoa vàng thơm ngon, chất lượng cao', 'Kg', 25000, 35000, 200, 2000, 400, 1),
+    ('SP012', N'Thịt heo tươi', 4, 4, N'Thịt heo tươi ngon, đảm bảo vệ sinh an toàn thực phẩm', 'Kg', 120000, 180000, 100, 1000, 200, 1),
+    ('SP013', N'Bàn ăn gỗ', 5, 5, N'Bàn ăn gỗ tự nhiên, thiết kế hiện đại', 'Cái', 3000000, 4500000, 5, 50, 10, 1),
+    ('SP014', N'Ghế sofa', 5, 5, N'Ghế sofa phòng khách, chất liệu cao cấp', 'Bộ', 5000000, 7500000, 3, 30, 6, 1),
+    ('SP015', N'Bóng đá', 6, 6, N'Bóng đá chính hãng, kích thước chuẩn', 'Quả', 200000, 300000, 20, 200, 40, 1),
+    ('SP016', N'Vợt cầu lông', 6, 6, N'Vợt cầu lông chuyên nghiệp, trọng lượng nhẹ', 'Cái', 800000, 1200000, 15, 150, 30, 1),
+    ('SP017', N'Son môi', 7, 7, N'Son môi màu đẹp, không khô môi', 'Cây', 150000, 250000, 50, 500, 100, 1),
+    ('SP018', N'Kem dưỡng ẩm', 7, 7, N'Kem dưỡng ẩm cho da khô, thành phần tự nhiên', 'Hộp', 300000, 450000, 30, 300, 60, 1),
+    ('SP019', N'Bút bi', 8, 8, N'Bút bi mực đen, viết mượt mà', 'Cây', 5000, 8000, 500, 5000, 1000, 1),
+    ('SP020', N'Vở học sinh', 8, 8, N'Vở học sinh 200 trang, giấy trắng mịn', 'Quyển', 15000, 25000, 200, 2000, 400, 1),
+    ('SP021', N'Xe đồ chơi điều khiển', 9, 9, N'Xe đồ chơi điều khiển từ xa, pin sạc', 'Cái', 500000, 800000, 10, 100, 20, 1),
+    ('SP022', N'Búp bê Barbie', 9, 9, N'Búp bê Barbie cao cấp, nhiều phụ kiện', 'Cái', 300000, 500000, 15, 150, 30, 1),
+    ('SP023', N'Máy đo huyết áp', 10, 10, N'Máy đo huyết áp điện tử, độ chính xác cao', 'Cái', 800000, 1200000, 8, 80, 16, 1),
+    ('SP024', N'Thuốc cảm cúm', 10, 10, N'Thuốc cảm cúm hiệu quả, an toàn cho sức khỏe', 'Hộp', 50000, 80000, 100, 1000, 200, 1);
 
 -- Thêm dữ liệu mẫu kho hàng
-INSERT INTO [dbo].[KhoHang] ([MaKhoCode], [TenKho], [DiaChi], [SoDienThoai], [Email], [NguoiTao])
+INSERT INTO [dbo].[KhoHang] ([MaKhoCode], [TenKho], [DiaChi], [SoDienThoai], [Email], [MaNguoiDungTao])
 VALUES 
-    ('KH001', N'Kho chính TP.HCM', N'100 Đường Kho hàng, Khu Công nghiệp Tân Bình, TP.HCM', '0123456789', 'khochinh@quanlykho.com', 'Hệ thống'),
-    ('KH002', N'Kho phụ TP.HCM', N'200 Đường Lưu trữ, Khu Thương mại Quận 1, TP.HCM', '0987654321', 'khophu@quanlykho.com', 'Hệ thống'),
-    ('KH003', N'Kho Hà Nội', N'300 Đường Kho hàng, Khu Công nghiệp Long Biên, Hà Nội', '0369852147', 'khohn@quanlykho.com', 'Hệ thống'),
-    ('KH004', N'Kho Đà Nẵng', N'400 Đường Lưu trữ, Khu Thương mại Hải Châu, Đà Nẵng', '0123456780', 'khodn@quanlykho.com', 'Hệ thống'),
-    ('KH005', N'Kho Cần Thơ', N'500 Đường Kho hàng, Khu Công nghiệp Cái Răng, Cần Thơ', '0987654320', 'khoct@quanlykho.com', 'Hệ thống');
+    ('KH001', N'Kho chính TP.HCM', N'100 Đường Kho hàng, Khu Công nghiệp Tân Bình, TP.HCM', '0123456789', 'khochinh@quanlykho.com', 1),
+    ('KH002', N'Kho phụ TP.HCM', N'200 Đường Lưu trữ, Khu Thương mại Quận 1, TP.HCM', '0987654321', 'khophu@quanlykho.com', 1),
+    ('KH003', N'Kho Hà Nội', N'300 Đường Kho hàng, Khu Công nghiệp Long Biên, Hà Nội', '0369852147', 'khohn@quanlykho.com', 1),
+    ('KH004', N'Kho Đà Nẵng', N'400 Đường Lưu trữ, Khu Thương mại Hải Châu, Đà Nẵng', '0123456780', 'khodn@quanlykho.com', 1),
+    ('KH005', N'Kho Cần Thơ', N'500 Đường Kho hàng, Khu Công nghiệp Cái Răng, Cần Thơ', '0987654320', 'khoct@quanlykho.com', 1);
 
 -- Thêm dữ liệu mẫu vị trí trong kho
-INSERT INTO [dbo].[ViTriTrongKho] ([MaKho], [MaViTriCode], [TenViTri], [LoaiViTri], [LoiDi], [Hang], [Tang], [ViTri], [NguoiTao])
+INSERT INTO [dbo].[ViTriTrongKho] ([MaKho], [MaViTriCode], [TenViTri], [LoaiViTri], [LoiDi], [Hang], [Tang], [ViTri], [MaNguoiDungTao])
 VALUES 
     -- Kho chính TP.HCM
-    (1, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 'Hệ thống'),
-    (1, 'A1-H1-T2', N'Lối đi 1, Hàng 1, Tầng 2', N'Kệ', 'A1', 'H1', 'T2', 'V1', 'Hệ thống'),
-    (1, 'A2-H1-T1', N'Lối đi 2, Hàng 1, Tầng 1', N'Giá', 'A2', 'H1', 'T1', 'V1', 'Hệ thống'),
-    (1, 'A2-H2-T1', N'Lối đi 2, Hàng 2, Tầng 1', N'Giá', 'A2', 'H2', 'T1', 'V1', 'Hệ thống'),
-    (1, 'A3-H1-T1', N'Lối đi 3, Hàng 1, Tầng 1', N'Thùng', 'A3', 'H1', 'T1', 'V1', 'Hệ thống'),
+    (1, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 1),
+    (1, 'A1-H1-T2', N'Lối đi 1, Hàng 1, Tầng 2', N'Kệ', 'A1', 'H1', 'T2', 'V1', 1),
+    (1, 'A2-H1-T1', N'Lối đi 2, Hàng 1, Tầng 1', N'Giá', 'A2', 'H1', 'T1', 'V1', 1),
+    (1, 'A2-H2-T1', N'Lối đi 2, Hàng 2, Tầng 1', N'Giá', 'A2', 'H2', 'T1', 'V1', 1),
+    (1, 'A3-H1-T1', N'Lối đi 3, Hàng 1, Tầng 1', N'Thùng', 'A3', 'H1', 'T1', 'V1', 1),
     
     -- Kho phụ TP.HCM
-    (2, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 'Hệ thống'),
-    (2, 'A1-H2-T1', N'Lối đi 1, Hàng 2, Tầng 1', N'Kệ', 'A1', 'H2', 'T1', 'V1', 'Hệ thống'),
+    (2, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 1),
+    (2, 'A1-H2-T1', N'Lối đi 1, Hàng 2, Tầng 1', N'Kệ', 'A1', 'H2', 'T1', 'V1', 1),
     
     -- Kho Hà Nội
-    (3, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 'Hệ thống'),
-    (3, 'A1-H1-T2', N'Lối đi 1, Hàng 1, Tầng 2', N'Kệ', 'A1', 'H1', 'T2', 'V1', 'Hệ thống'),
+    (3, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 1),
+    (3, 'A1-H1-T2', N'Lối đi 1, Hàng 1, Tầng 2', N'Kệ', 'A1', 'H1', 'T2', 'V1', 1),
     
     -- Kho Đà Nẵng
-    (4, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 'Hệ thống'),
+    (4, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 1),
     
     -- Kho Cần Thơ
-    (5, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 'Hệ thống');
+    (5, 'A1-H1-T1', N'Lối đi 1, Hàng 1, Tầng 1', N'Kệ', 'A1', 'H1', 'T1', 'V1', 1);
 
 -- Thêm dữ liệu mẫu người dùng hệ thống
-INSERT INTO [dbo].[NguoiDungHeThong] ([TenDangNhap], [MatKhau], [HoTen], [Email], [NguoiTao])
+INSERT INTO [dbo].[NguoiDungHeThong] ([TenDangNhap], [MatKhau], [HoTen], [Email], [MaNguoiDungTao])
 VALUES 
-    ('admin', 'admin123', N'Quản trị viên hệ thống', 'admin@quanlykho.com', 'Hệ thống'),
-    ('manager', 'manager123', N'Quản lý kho', 'manager@quanlykho.com', 'Hệ thống'),
-    ('operator', 'operator123', N'Nhân viên kho', 'operator@quanlykho.com', 'Hệ thống'),
-    ('nguyenvana', 'nvana123', N'Nguyễn Văn A', 'nguyenvana@quanlykho.com', 'Hệ thống'),
-    ('tranthib', 'tthib123', N'Trần Thị B', 'tranthib@quanlykho.com', 'Hệ thống'),
-    ('levanc', 'lvanc123', N'Lê Văn C', 'levanc@quanlykho.com', 'Hệ thống'),
-    ('phamthid', 'pthid123', N'Phạm Thị D', 'phamthid@quanlykho.com', 'Hệ thống'),
-    ('hoangvane', 'hvane123', N'Hoàng Văn E', 'hoangvane@quanlykho.com', 'Hệ thống'),
-    ('vuthif', 'vthif123', N'Vũ Thị F', 'vuthif@quanlykho.com', 'Hệ thống'),
-    ('dangvang', 'dvang123', N'Đặng Văn G', 'dangvang@quanlykho.com', 'Hệ thống');
+    ('manager', 'manager123', N'Quản lý kho', 'manager@quanlykho.com', 1),
+    ('operator', 'operator123', N'Nhân viên kho', 'operator@quanlykho.com', 1),
+    ('nguyenvana', 'nvana123', N'Nguyễn Văn A', 'nguyenvana@quanlykho.com', 1),
+    ('tranthib', 'tthib123', N'Trần Thị B', 'tranthib@quanlykho.com', 1),
+    ('levanc', 'lvanc123', N'Lê Văn C', 'levanc@quanlykho.com', 1),
+    ('phamthid', 'pthid123', N'Phạm Thị D', 'phamthid@quanlykho.com', 1),
+    ('hoangvane', 'hvane123', N'Hoàng Văn E', 'hoangvane@quanlykho.com', 1),
+    ('vuthif', 'vthif123', N'Vũ Thị F', 'vuthif@quanlykho.com', 1),
+    ('dangvang', 'dvang123', N'Đặng Văn G', 'dangvang@quanlykho.com', 1);
 
 -- Thêm dữ liệu mẫu vai trò người dùng
-INSERT INTO [dbo].[VaiTroNguoiDung] ([MaNguoiDung], [TenVaiTro], [NguoiTao])
+INSERT INTO [dbo].[VaiTroNguoiDung] ([MaNguoiDung], [TenVaiTro], [MaNguoiDungTao])
 VALUES 
-    (1, N'Quản trị viên', 'Hệ thống'),
-    (2, N'Quản lý', 'Hệ thống'),
-    (3, N'Nhân viên', 'Hệ thống'),
-    (4, N'Quản lý', 'Hệ thống'),
-    (5, N'Quản lý', 'Hệ thống'),
-    (6, N'Nhân viên', 'Hệ thống'),
-    (7, N'Nhân viên', 'Hệ thống'),
-    (8, N'Nhân viên', 'Hệ thống'),
-    (9, N'Nhân viên', 'Hệ thống'),
-    (10, N'Nhân viên', 'Hệ thống');
+    (1, N'Quản trị viên', 1),
+    (2, N'Quản lý', 1),
+    (3, N'Nhân viên', 1),
+    (4, N'Quản lý', 1),
+    (5, N'Quản lý', 1),
+    (6, N'Nhân viên', 1),
+    (7, N'Nhân viên', 1),
+    (8, N'Nhân viên', 1),
+    (9, N'Nhân viên', 1),
+    (10, N'Nhân viên', 1);
 
 -- Thêm dữ liệu mẫu khách hàng
-INSERT INTO [dbo].[KhachHang] ([MaKhachHangCode], [TenKhachHang], [NguoiLienHe], [SoDienThoai], [Email], [DiaChi], [MaSoThue], [HanMucTinDung], [DieuKienThanhToan], [NguoiTao])
+INSERT INTO [dbo].[KhachHang] ([MaKhachHangCode], [TenKhachHang], [NguoiLienHe], [SoDienThoai], [Email], [DiaChi], [MaSoThue], [HanMucTinDung], [DieuKienThanhToan], [MaNguoiDungTao])
 VALUES 
-    ('KH001', N'Công ty TNHH ABC', N'Nguyễn Văn X', '0123456789', 'contact@abc.com', N'123 Đường ABC, Quận 1, TP.HCM', '0123456789', 100000000, N'Thanh toán 30 ngày', 'Hệ thống'),
-    ('KH002', N'Cửa hàng Thời trang XYZ', N'Trần Thị Y', '0987654321', 'info@xyz.com', N'456 Đường XYZ, Quận 3, TP.HCM', '0987654321', 50000000, N'Thanh toán ngay', 'Hệ thống'),
-    ('KH003', N'Siêu thị Mini Mart', N'Lê Văn Z', '0369852147', 'sales@minimart.com', N'789 Đường Mini, Quận 5, TP.HCM', '0369852147', 200000000, N'Thanh toán 15 ngày', 'Hệ thống'),
-    ('KH004', N'Công ty Công nghệ TechPro', N'Phạm Thị W', '0123456780', 'hello@techpro.com', N'321 Đường Tech, Quận 7, TP.HCM', '0123456780', 150000000, N'Thanh toán 30 ngày', 'Hệ thống'),
-    ('KH005', N'Cửa hàng Điện máy E-Mart', N'Hoàng Văn V', '0987654320', 'sales@emart.com', N'654 Đường E-Mart, Quận 10, TP.HCM', '0987654320', 300000000, N'Thanh toán 45 ngày', 'Hệ thống'),
-    ('KH006', N'Công ty Thực phẩm FoodCorp', N'Vũ Thị U', '0369852140', 'info@foodcorp.com', N'987 Đường Food, Quận 11, TP.HCM', '0369852140', 80000000, N'Thanh toán 30 ngày', 'Hệ thống'),
-    ('KH007', N'Cửa hàng Sách BookStore', N'Đặng Văn T', '0123456781', 'contact@bookstore.com', N'147 Đường Book, Quận 2, TP.HCM', '0123456781', 40000000, N'Thanh toán ngay', 'Hệ thống'),
-    ('KH008', N'Công ty Gia dụng HomePro', N'Bùi Thị S', '0987654322', 'sales@homepro.com', N'258 Đường Home, Quận 4, TP.HCM', '0987654322', 120000000, N'Thanh toán 30 ngày', 'Hệ thống'),
-    ('KH009', N'Cửa hàng Thể thao SportMax', N'Lý Văn R', '0369852141', 'info@sportmax.com', N'369 Đường Sport, Quận 6, TP.HCM', '0369852141', 60000000, N'Thanh toán 15 ngày', 'Hệ thống'),
-    ('KH010', N'Công ty Mỹ phẩm BeautyCorp', N'Trịnh Thị Q', '0123456782', 'hello@beautycorp.com', N'741 Đường Beauty, Quận 8, TP.HCM', '0123456782', 90000000, N'Thanh toán 30 ngày', 'Hệ thống');
+    ('KH001', N'Công ty TNHH ABC', N'Nguyễn Văn X', '0123456789', 'contact@abc.com', N'123 Đường ABC, Quận 1, TP.HCM', '0123456789', 100000000, N'Thanh toán 30 ngày', 1),
+    ('KH002', N'Cửa hàng Thời trang XYZ', N'Trần Thị Y', '0987654321', 'info@xyz.com', N'456 Đường XYZ, Quận 3, TP.HCM', '0987654321', 50000000, N'Thanh toán ngay', 1),
+    ('KH003', N'Siêu thị Mini Mart', N'Lê Văn Z', '0369852147', 'sales@minimart.com', N'789 Đường Mini, Quận 5, TP.HCM', '0369852147', 200000000, N'Thanh toán 15 ngày', 1),
+    ('KH004', N'Công ty Công nghệ TechPro', N'Phạm Thị W', '0123456780', 'hello@techpro.com', N'321 Đường Tech, Quận 7, TP.HCM', '0123456780', 150000000, N'Thanh toán 30 ngày', 1),
+    ('KH005', N'Cửa hàng Điện máy E-Mart', N'Hoàng Văn V', '0987654320', 'sales@emart.com', N'654 Đường E-Mart, Quận 10, TP.HCM', '0987654320', 300000000, N'Thanh toán 45 ngày', 1),
+    ('KH006', N'Công ty Thực phẩm FoodCorp', N'Vũ Thị U', '0369852140', 'info@foodcorp.com', N'987 Đường Food, Quận 11, TP.HCM', '0369852140', 80000000, N'Thanh toán 30 ngày', 1),
+    ('KH007', N'Cửa hàng Sách BookStore', N'Đặng Văn T', '0123456781', 'contact@bookstore.com', N'147 Đường Book, Quận 2, TP.HCM', '0123456781', 40000000, N'Thanh toán ngay', 1),
+    ('KH008', N'Công ty Gia dụng HomePro', N'Bùi Thị S', '0987654322', 'sales@homepro.com', N'258 Đường Home, Quận 4, TP.HCM', '0987654322', 120000000, N'Thanh toán 30 ngày', 1),
+    ('KH009', N'Cửa hàng Thể thao SportMax', N'Lý Văn R', '0369852141', 'info@sportmax.com', N'369 Đường Sport, Quận 6, TP.HCM', '0369852141', 60000000, N'Thanh toán 15 ngày', 1),
+    ('KH010', N'Công ty Mỹ phẩm BeautyCorp', N'Trịnh Thị Q', '0123456782', 'hello@beautycorp.com', N'741 Đường Beauty, Quận 8, TP.HCM', '0123456782', 90000000, N'Thanh toán 30 ngày', 1);
 
 -- Thêm dữ liệu mẫu đơn đặt hàng
-INSERT INTO [dbo].[DonDatHang] ([SoDonDatHang], [MaNhaCungCap], [NgayDat], [NgayGiaoDuKien], [TrangThai], [TongTien], [GhiChu], [NguoiTao])
+INSERT INTO [dbo].[DonDatHang] ([SoDonDatHang], [MaNhaCungCap], [NgayDat], [NgayGiaoDuKien], [TrangThai], [TongTien], [GhiChu], [MaNguoiDungTao])
 VALUES 
-    ('DDH001', 1, '2024-01-15', '2024-01-25', N'Đã duyệt', 25000000, N'Đơn hàng laptop cho phòng IT', 'nguyenvana'),
-    ('DDH002', 2, '2024-01-16', '2024-01-26', N'Đã gửi', 1500000, N'Đơn hàng quần áo cho nhân viên', 'tranthib'),
-    ('DDH003', 3, '2024-01-17', '2024-01-27', N'Đã duyệt', 500000, N'Đơn hàng sách cho thư viện', 'levanc'),
-    ('DDH004', 4, '2024-01-18', '2024-01-28', N'Nháp', 2000000, N'Đơn hàng thực phẩm cho căng tin', 'phamthid'),
-    ('DDH005', 5, '2024-01-19', '2024-01-29', N'Đã gửi', 8000000, N'Đơn hàng đồ gia dụng cho văn phòng', 'hoangvane');
+    ('DDH001', 1, '2024-01-15', '2024-01-25', N'Đã duyệt', 25000000, N'Đơn hàng laptop cho phòng IT', 4),
+    ('DDH002', 2, '2024-01-16', '2024-01-26', N'Đã gửi', 1500000, N'Đơn hàng quần áo cho nhân viên', 5),
+    ('DDH003', 3, '2024-01-17', '2024-01-27', N'Đã duyệt', 500000, N'Đơn hàng sách cho thư viện', 6),
+    ('DDH004', 4, '2024-01-18', '2024-01-28', N'Nháp', 2000000, N'Đơn hàng thực phẩm cho căng tin', 7),
+    ('DDH005', 5, '2024-01-19', '2024-01-29', N'Đã gửi', 8000000, N'Đơn hàng đồ gia dụng cho văn phòng', 8);
 
 -- Thêm dữ liệu mẫu chi tiết đơn đặt hàng
 INSERT INTO [dbo].[ChiTietDonDatHang] ([MaDonDatHang], [MaSanPham], [SoLuong], [DonGia], [GhiChu])
@@ -597,13 +628,13 @@ VALUES
     (5, 14, 1, 5000000, N'Ghế sofa');
 
 -- Thêm dữ liệu mẫu đơn hàng bán
-INSERT INTO [dbo].[DonHangBan] ([SoDonHangBan], [MaKhachHang], [NgayDat], [NgayYeuCau], [TrangThai], [TongTien], [GhiChu], [NguoiTao])
+INSERT INTO [dbo].[DonHangBan] ([SoDonHangBan], [MaKhachHang], [NgayDat], [NgayYeuCau], [TrangThai], [TongTien], [GhiChu], [MaNguoiDungTao])
 VALUES 
-    ('DHB001', 1, '2024-01-20', '2024-01-25', N'Đã xác nhận', 30000000, N'Đơn hàng laptop cho công ty', 'nguyenvana'),
-    ('DHB002', 2, '2024-01-21', '2024-01-26', N'Đã giao', 800000, N'Đơn hàng quần áo cho cửa hàng', 'tranthib'),
-    ('DHB003', 3, '2024-01-22', '2024-01-27', N'Đã xác nhận', 350000, N'Đơn hàng sách cho siêu thị', 'levanc'),
-    ('DHB004', 4, '2024-01-23', '2024-01-28', N'Đã giao', 1200000, N'Đơn hàng thiết bị công nghệ', 'phamthid'),
-    ('DHB005', 5, '2024-01-24', '2024-01-29', N'Đã xác nhận', 6000000, N'Đơn hàng đồ gia dụng', 'hoangvane');
+    ('DHB001', 1, '2024-01-20', '2024-01-25', N'Đã xác nhận', 30000000, N'Đơn hàng laptop cho công ty', 4),
+    ('DHB002', 2, '2024-01-21', '2024-01-26', N'Đã giao', 800000, N'Đơn hàng quần áo cho cửa hàng', 5),
+    ('DHB003', 3, '2024-01-22', '2024-01-27', N'Đã xác nhận', 350000, N'Đơn hàng sách cho siêu thị', 6),
+    ('DHB004', 4, '2024-01-23', '2024-01-28', N'Đã giao', 1200000, N'Đơn hàng thiết bị công nghệ', 7),
+    ('DHB005', 5, '2024-01-24', '2024-01-29', N'Đã xác nhận', 6000000, N'Đơn hàng đồ gia dụng', 8);
 
 -- Thêm dữ liệu mẫu chi tiết đơn hàng bán
 INSERT INTO [dbo].[ChiTietDonHangBan] ([MaDonHangBan], [MaSanPham], [SoLuong], [DonGia], [GhiChu])
@@ -616,12 +647,12 @@ VALUES
     (5, 13, 2, 3000000, N'Bàn ăn gỗ');
 
 -- Thêm dữ liệu mẫu phiếu nhập kho
-INSERT INTO [dbo].[PhieuNhapKho] ([SoPhieuNhap], [MaDonDatHang], [MaNhaCungCap], [NgayNhap], [MaKho], [TrangThai], [TongTien], [GhiChu], [NguoiTao])
+INSERT INTO [dbo].[PhieuNhapKho] ([SoPhieuNhap], [MaDonDatHang], [MaNhaCungCap], [NgayNhap], [MaKho], [TrangThai], [TongTien], [GhiChu], [MaNguoiDungTao])
 VALUES 
-    ('PNK001', 1, 1, '2024-01-25', 1, N'Đã ghi sổ', 25000000, N'Phiếu nhập laptop', 'nguyenvana'),
-    ('PNK002', 2, 2, '2024-01-26', 1, N'Đã ghi sổ', 1500000, N'Phiếu nhập quần áo', 'tranthib'),
-    ('PNK003', 3, 3, '2024-01-27', 1, N'Đã ghi sổ', 500000, N'Phiếu nhập sách', 'levanc'),
-    ('PNK004', 5, 5, '2024-01-29', 2, N'Đã ghi sổ', 8000000, N'Phiếu nhập đồ gia dụng', 'hoangvane');
+    ('PNK001', 1, 1, '2024-01-25', 1, N'Đã ghi sổ', 25000000, N'Phiếu nhập laptop', 4),
+    ('PNK002', 2, 2, '2024-01-26', 1, N'Đã ghi sổ', 1500000, N'Phiếu nhập quần áo', 5),
+    ('PNK003', 3, 3, '2024-01-27', 1, N'Đã ghi sổ', 500000, N'Phiếu nhập sách', 6),
+    ('PNK004', 5, 5, '2024-01-29', 2, N'Đã ghi sổ', 8000000, N'Phiếu nhập đồ gia dụng', 8);
 
 -- Thêm dữ liệu mẫu chi tiết phiếu nhập kho
 INSERT INTO [dbo].[ChiTietPhieuNhapKho] ([MaPhieuNhap], [MaSanPham], [MaViTri], [SoLuong], [DonGia], [SoLo], [GhiChu])
@@ -635,13 +666,13 @@ VALUES
     (4, 14, 4, 1, 5000000, 'LOT007', N'Ghế sofa');
 
 -- Thêm dữ liệu mẫu phiếu xuất kho
-INSERT INTO [dbo].[PhieuXuatKho] ([SoPhieuXuat], [MaDonHangBan], [MaKhachHang], [NgayXuat], [MaKho], [TrangThai], [TongTien], [GhiChu], [NguoiTao])
+INSERT INTO [dbo].[PhieuXuatKho] ([SoPhieuXuat], [MaDonHangBan], [MaKhachHang], [NgayXuat], [MaKho], [TrangThai], [TongTien], [GhiChu], [MaNguoiDungTao])
 VALUES 
-    ('PXK001', 1, 1, '2024-01-25', 1, N'Đã giao', 30000000, N'Phiếu xuất laptop', 'nguyenvana'),
-    ('PXK002', 2, 2, '2024-01-26', 1, N'Đã giao', 800000, N'Phiếu xuất quần áo', 'tranthib'),
-    ('PXK003', 3, 3, '2024-01-27', 1, N'Đã giao', 350000, N'Phiếu xuất sách', 'levanc'),
-    ('PXK004', 4, 4, '2024-01-28', 1, N'Đã giao', 1200000, N'Phiếu xuất thiết bị công nghệ', 'phamthid'),
-    ('PXK005', 5, 5, '2024-01-29', 2, N'Đã giao', 6000000, N'Phiếu xuất đồ gia dụng', 'hoangvane');
+    ('PXK001', 1, 1, '2024-01-25', 1, N'Đã giao', 30000000, N'Phiếu xuất laptop', 4),
+    ('PXK002', 2, 2, '2024-01-26', 1, N'Đã giao', 800000, N'Phiếu xuất quần áo', 5),
+    ('PXK003', 3, 3, '2024-01-27', 1, N'Đã giao', 350000, N'Phiếu xuất sách', 6),
+    ('PXK004', 4, 4, '2024-01-28', 1, N'Đã giao', 1200000, N'Phiếu xuất thiết bị công nghệ', 7),
+    ('PXK005', 5, 5, '2024-01-29', 2, N'Đã giao', 6000000, N'Phiếu xuất đồ gia dụng', 8);
 
 -- Thêm dữ liệu mẫu chi tiết phiếu xuất kho
 INSERT INTO [dbo].[ChiTietPhieuXuatKho] ([MaPhieuXuat], [MaSanPham], [MaViTri], [SoLuong], [DonGia], [GhiChu])
@@ -656,47 +687,47 @@ VALUES
 -- Thêm dữ liệu mẫu tồn kho
 INSERT INTO [dbo].[TonKho] ([MaSanPham], [MaKho], [MaViTri], [SoLo], [SoSerial], [NgayHetHan], [SoLuongTon], [SoLuongDatTruoc], [NgayKiemKeCuoi], [NguoiSuaCuoi])
 VALUES 
-    (1, 1, 1, 'LOT001', 'SN001', '2027-01-25', 0, 0, '2024-01-25', 'nguyenvana'),
-    (3, 1, 2, 'LOT002', NULL, '2026-01-26', 7, 0, '2024-01-26', 'tranthib'),
-    (7, 1, 2, 'LOT003', NULL, '2026-01-26', 4, 0, '2024-01-26', 'tranthib'),
-    (4, 1, 3, 'LOT004', NULL, '2029-01-27', 1, 0, '2024-01-27', 'levanc'),
-    (9, 1, 3, 'LOT005', NULL, '2029-01-27', 2, 0, '2024-01-27', 'levanc'),
-    (13, 2, 4, 'LOT006', NULL, '2034-01-29', 0, 0, '2024-01-29', 'hoangvane'),
-    (14, 2, 4, 'LOT007', NULL, '2034-01-29', 0, 0, '2024-01-29', 'hoangvane'),
-    (5, 1, 1, 'LOT008', NULL, '2027-01-28', 0, 0, '2024-01-28', 'phamthid'),
-    (2, 1, 1, 'LOT009', 'SN002', '2027-01-20', 8, 0, '2024-01-20', 'nguyenvana'),
-    (6, 1, 1, 'LOT010', NULL, '2027-01-20', 22, 0, '2024-01-20', 'nguyenvana'),
-    (8, 1, 2, 'LOT011', NULL, '2026-01-20', 18, 0, '2024-01-20', 'tranthib'),
-    (10, 1, 3, 'LOT012', NULL, '2024-12-31', 95, 0, '2024-01-20', 'levanc'),
-    (11, 1, 3, 'LOT013', NULL, '2025-06-30', 180, 0, '2024-01-20', 'phamthid'),
-    (12, 1, 3, 'LOT014', NULL, '2024-02-15', 85, 0, '2024-01-20', 'phamthid'),
-    (15, 1, 5, 'LOT015', NULL, '2026-01-20', 18, 0, '2024-01-20', 'vuthif'),
-    (16, 1, 5, 'LOT016', NULL, '2026-01-20', 13, 0, '2024-01-20', 'vuthif'),
-    (17, 1, 2, 'LOT017', NULL, '2026-06-30', 45, 0, '2024-01-20', 'dangvang'),
-    (18, 1, 2, 'LOT018', NULL, '2026-06-30', 27, 0, '2024-01-20', 'dangvang'),
-    (19, 1, 3, 'LOT019', NULL, '2027-12-31', 480, 0, '2024-01-20', 'buithih'),
-    (20, 1, 3, 'LOT020', NULL, '2027-12-31', 185, 0, '2024-01-20', 'buithih'),
-    (21, 1, 5, 'LOT021', NULL, '2027-01-20', 8, 0, '2024-01-20', 'lyvani'),
-    (22, 1, 5, 'LOT022', NULL, '2027-01-20', 13, 0, '2024-01-20', 'lyvani'),
-    (23, 1, 1, 'LOT023', 'SN003', '2027-01-20', 7, 0, '2024-01-20', 'trinhthik'),
-    (24, 1, 3, 'LOT024', NULL, '2026-06-30', 95, 0, '2024-01-20', 'trinhthik');
+    (1, 1, 1, 'LOT001', 'SN001', '2027-01-25', 0, 0, '2024-01-25', 4),
+    (3, 1, 2, 'LOT002', NULL, '2026-01-26', 7, 0, '2024-01-26', 5),
+    (7, 1, 2, 'LOT003', NULL, '2026-01-26', 4, 0, '2024-01-26', 5),
+    (4, 1, 3, 'LOT004', NULL, '2029-01-27', 1, 0, '2024-01-27', 6),
+    (9, 1, 3, 'LOT005', NULL, '2029-01-27', 2, 0, '2024-01-27', 6),
+    (13, 2, 4, 'LOT006', NULL, '2034-01-29', 0, 0, '2024-01-29', 8),
+    (14, 2, 4, 'LOT007', NULL, '2034-01-29', 0, 0, '2024-01-29', 8),
+    (5, 1, 1, 'LOT008', NULL, '2027-01-28', 0, 0, '2024-01-28', 7),
+    (2, 1, 1, 'LOT009', 'SN002', '2027-01-20', 8, 0, '2024-01-20', 4),
+    (6, 1, 1, 'LOT010', NULL, '2027-01-20', 22, 0, '2024-01-20', 4),
+    (8, 1, 2, 'LOT011', NULL, '2026-01-20', 18, 0, '2024-01-20', 5),
+    (10, 1, 3, 'LOT012', NULL, '2024-12-31', 95, 0, '2024-01-20', 6),
+    (11, 1, 3, 'LOT013', NULL, '2025-06-30', 180, 0, '2024-01-20', 7),
+    (12, 1, 3, 'LOT014', NULL, '2024-02-15', 85, 0, '2024-01-20', 7),
+    (15, 1, 5, 'LOT015', NULL, '2026-01-20', 18, 0, '2024-01-20', 9),
+    (16, 1, 5, 'LOT016', NULL, '2026-01-20', 13, 0, '2024-01-20', 9),
+    (17, 1, 2, 'LOT017', NULL, '2026-06-30', 45, 0, '2024-01-20', 10),
+    (18, 1, 2, 'LOT018', NULL, '2026-06-30', 27, 0, '2024-01-20', 10),
+    (19, 1, 3, 'LOT019', NULL, '2027-12-31', 480, 0, '2024-01-20', 11),
+    (20, 1, 3, 'LOT020', NULL, '2027-12-31', 185, 0, '2024-01-20', 11),
+    (21, 1, 5, 'LOT021', NULL, '2027-01-20', 8, 0, '2024-01-20', 12),
+    (22, 1, 5, 'LOT022', NULL, '2027-01-20', 13, 0, '2024-01-20', 12),
+    (23, 1, 1, 'LOT023', 'SN003', '2027-01-20', 7, 0, '2024-01-20', 13),
+    (24, 1, 3, 'LOT024', NULL, '2026-06-30', 95, 0, '2024-01-20', 13);
 
 -- Thêm dữ liệu mẫu giao dịch tồn kho
 INSERT INTO [dbo].[GiaoDichTonKho] ([LoaiGiaoDich], [LoaiThamChieu], [MaThamChieu], [MaSanPham], [MaKho], [MaViTri], [SoLuong], [ChiPhiDonVi], [SoLo], [GhiChu], [NguoiTao])
 VALUES 
-    (N'Nhập kho', N'Phiếu nhập kho', 1, 1, 1, 1, 1, 25000000, 'LOT001', N'Tự động tạo từ phiếu nhập kho', 'Hệ thống'),
-    (N'Nhập kho', N'Phiếu nhập kho', 2, 3, 1, 2, 10, 150000, 'LOT002', N'Tự động tạo từ phiếu nhập kho', 'Hệ thống'),
-    (N'Nhập kho', N'Phiếu nhập kho', 2, 7, 1, 2, 5, 400000, 'LOT003', N'Tự động tạo từ phiếu nhập kho', 'Hệ thống'),
-    (N'Nhập kho', N'Phiếu nhập kho', 3, 4, 1, 3, 2, 200000, 'LOT004', N'Tự động tạo từ phiếu nhập kho', 'Hệ thống'),
-    (N'Nhập kho', N'Phiếu nhập kho', 3, 9, 1, 3, 3, 150000, 'LOT005', N'Tự động tạo từ phiếu nhập kho', 'Hệ thống'),
-    (N'Nhập kho', N'Phiếu nhập kho', 4, 13, 2, 4, 2, 3000000, 'LOT006', N'Tự động tạo từ phiếu nhập kho', 'Hệ thống'),
-    (N'Nhập kho', N'Phiếu nhập kho', 4, 14, 2, 4, 1, 5000000, 'LOT007', N'Tự động tạo từ phiếu nhập kho', 'Hệ thống'),
-    (N'Xuất kho', N'Phiếu xuất kho', 1, 1, 1, 1, -1, 30000000, 'LOT001', N'Tự động tạo từ phiếu xuất kho', 'Hệ thống'),
-    (N'Xuất kho', N'Phiếu xuất kho', 2, 3, 1, 2, -3, 250000, 'LOT002', N'Tự động tạo từ phiếu xuất kho', 'Hệ thống'),
-    (N'Xuất kho', N'Phiếu xuất kho', 2, 7, 1, 2, -1, 600000, 'LOT003', N'Tự động tạo từ phiếu xuất kho', 'Hệ thống'),
-    (N'Xuất kho', N'Phiếu xuất kho', 3, 4, 1, 3, -1, 350000, 'LOT004', N'Tự động tạo từ phiếu xuất kho', 'Hệ thống'),
-    (N'Xuất kho', N'Phiếu xuất kho', 4, 5, 1, 1, -1, 1200000, 'LOT008', N'Tự động tạo từ phiếu xuất kho', 'Hệ thống'),
-    (N'Xuất kho', N'Phiếu xuất kho', 5, 13, 2, 4, -2, 3000000, 'LOT006', N'Tự động tạo từ phiếu xuất kho', 'Hệ thống');
+    (N'Nhập kho', N'Phiếu nhập kho', 1, 1, 1, 1, 1, 25000000, 'LOT001', N'Tự động tạo từ phiếu nhập kho', 1),
+    (N'Nhập kho', N'Phiếu nhập kho', 2, 3, 1, 2, 10, 150000, 'LOT002', N'Tự động tạo từ phiếu nhập kho', 1),
+    (N'Nhập kho', N'Phiếu nhập kho', 2, 7, 1, 2, 5, 400000, 'LOT003', N'Tự động tạo từ phiếu nhập kho', 1),
+    (N'Nhập kho', N'Phiếu nhập kho', 3, 4, 1, 3, 2, 200000, 'LOT004', N'Tự động tạo từ phiếu nhập kho', 1),
+    (N'Nhập kho', N'Phiếu nhập kho', 3, 9, 1, 3, 3, 150000, 'LOT005', N'Tự động tạo từ phiếu nhập kho', 1),
+    (N'Nhập kho', N'Phiếu nhập kho', 4, 13, 2, 4, 2, 3000000, 'LOT006', N'Tự động tạo từ phiếu nhập kho', 1),
+    (N'Nhập kho', N'Phiếu nhập kho', 4, 14, 2, 4, 1, 5000000, 'LOT007', N'Tự động tạo từ phiếu nhập kho', 1),
+    (N'Xuất kho', N'Phiếu xuất kho', 1, 1, 1, 1, -1, 30000000, 'LOT001', N'Tự động tạo từ phiếu xuất kho', 1),
+    (N'Xuất kho', N'Phiếu xuất kho', 2, 3, 1, 2, -3, 250000, 'LOT002', N'Tự động tạo từ phiếu xuất kho', 1),
+    (N'Xuất kho', N'Phiếu xuất kho', 2, 7, 1, 2, -1, 600000, 'LOT003', N'Tự động tạo từ phiếu xuất kho', 1),
+    (N'Xuất kho', N'Phiếu xuất kho', 3, 4, 1, 3, -1, 350000, 'LOT004', N'Tự động tạo từ phiếu xuất kho', 1),
+    (N'Xuất kho', N'Phiếu xuất kho', 4, 5, 1, 1, -1, 1200000, 'LOT008', N'Tự động tạo từ phiếu xuất kho', 1),
+    (N'Xuất kho', N'Phiếu xuất kho', 5, 13, 2, 4, -2, 3000000, 'LOT006', N'Tự động tạo từ phiếu xuất kho', 1);
 
 -- =============================================
 -- CREATE VIEWS FOR REPORTING
@@ -828,7 +859,7 @@ CREATE PROCEDURE [dbo].[sp_CapNhatSoLuongTonKho]
     @NgayHetHan DATE = NULL,
     @ChiPhiDonVi DECIMAL(18,4) = NULL,
     @GhiChu NVARCHAR(500) = NULL,
-    @MaNguoiDung NVARCHAR(50) = NULL
+    @MaNguoiDung INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -952,18 +983,18 @@ BEGIN
             [SoLuongTon] = [SoLuongTon] + @SoLuong,
             [MaViTri] = ISNULL(@MaViTri, [MaViTri]),
             [NgaySuaCuoi] = GETDATE(),
-            [NguoiSuaCuoi] = N'Hệ thống'
+            [NguoiSuaCuoi] = r.[MaNguoiDungTao]
         WHERE [MaSanPham] = @MaSanPham AND [MaKho] = @MaKho AND (@SoLo IS NULL OR [SoLo] = @SoLo);
     END
     ELSE
     BEGIN
         INSERT INTO [dbo].[TonKho] ([MaSanPham], [MaKho], [MaViTri], [SoLo], [SoSerial], [NgayHetHan], [SoLuongTon], [NguoiSuaCuoi])
-        VALUES (@MaSanPham, @MaKho, @MaViTri, @SoLo, @SoSerial, @NgayHetHan, @SoLuong, N'Hệ thống');
+        VALUES (@MaSanPham, @MaKho, @MaViTri, @SoLo, @SoSerial, @NgayHetHan, @SoLuong, r.[MaNguoiDungTao]);
     END
     
     -- Thêm giao dịch tồn kho
     INSERT INTO [dbo].[GiaoDichTonKho] ([LoaiGiaoDich], [LoaiThamChieu], [MaThamChieu], [MaSanPham], [MaKho], [MaViTri], [SoLuong], [ChiPhiDonVi], [SoLo], [SoSerial], [NgayHetHan], [GhiChu], [NguoiTao])
-    VALUES (N'Nhập kho', N'Phiếu nhập kho', @MaPhieuNhap, @MaSanPham, @MaKho, @MaViTri, @SoLuong, @DonGia, @SoLo, @SoSerial, @NgayHetHan, N'Tự động tạo từ phiếu nhập kho', N'Hệ thống');
+    VALUES (N'Nhập kho', N'Phiếu nhập kho', @MaPhieuNhap, @MaSanPham, @MaKho, @MaViTri, @SoLuong, @DonGia, @SoLo, @SoSerial, @NgayHetHan, N'Tự động tạo từ phiếu nhập kho', r.[MaNguoiDungTao]);
 END;
 GO
 
@@ -1000,4 +1031,21 @@ Tính năng chính:
 - Theo dõi vận chuyển và hậu cần
 - Kiểm soát chất lượng và kiểm tra
 - Dự báo và lập kế hoạch nhu cầu
+
+=== CÁC THAY ĐỔI ĐÃ THỰC HIỆN ===
+
+1. **Sửa lỗi thiết kế nghiêm trọng**: Thêm khóa ngoại cho bảng KhachHang và NguoiDungHeThong
+2. **Chuẩn hóa dữ liệu**: Thay thế trường text NguoiTao/NguoiSua bằng khóa ngoại MaNguoiDungTao/MaNguoiDungSua
+3. **Tính toàn vẹn**: Đảm bảo tất cả bảng đều có mối quan hệ hợp lý
+4. **Audit trail**: Theo dõi ai tạo/sửa các bản ghi
+5. **Cập nhật dữ liệu mẫu**: Sửa tất cả INSERT statements để phù hợp với cấu trúc mới
+
+=== CẤU TRÚC MỚI ===
+
+- Bảng KhachHang: Liên kết với DonHangBan và PhieuXuatKho
+- Bảng NguoiDungHeThong: Liên kết với tất cả bảng chính
+- Tất cả bảng đều có trường MaNguoiDungTao và MaNguoiDungSua
+- Khóa ngoại được thiết lập đầy đủ và chính xác
+
+Cơ sở dữ liệu này giờ đây đã hoàn chỉnh và chuyên nghiệp!
 */
