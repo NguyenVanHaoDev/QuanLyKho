@@ -39,6 +39,16 @@ namespace QLKHO.GUI
         {
             try
             {
+                // Duyệt qua tất cả các form con đang mở
+                foreach (Form frm in this.MdiChildren)
+                {
+                    if (frm is FrmSanPham)
+                    {
+                        frm.Activate(); // đưa form đã mở lên trên
+                        lblStatus.Text = "Form quản lý sản phẩm đã được mở";
+                        return;
+                    }
+                }
                 var frmSanPham = new FrmSanPham();
                 frmSanPham.MdiParent = this;
                 frmSanPham.Show();
@@ -55,6 +65,17 @@ namespace QLKHO.GUI
         {
             try
             {
+
+                // Duyệt qua tất cả các form con đang mở
+                foreach (Form frm in this.MdiChildren)
+                {
+                    if (frm is FrmDanhMuc)
+                    {
+                        frm.Activate(); // đưa form đã mở lên trên
+                        lblStatus.Text = "Form quản lý danh mục đã được mở";
+                        return;
+                    }
+                }
                 var frmDanhMuc = new FrmDanhMuc();
                 frmDanhMuc.MdiParent = this;
                 frmDanhMuc.Show();
