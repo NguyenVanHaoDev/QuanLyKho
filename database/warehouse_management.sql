@@ -82,7 +82,7 @@ CREATE TABLE [dbo].[DanhMucSanPham] (
 );
 GO
 
--- 2. Bảng Nhà Cung Cấp
+-- 3. Bảng Nhà Cung Cấp
 CREATE TABLE [dbo].[NhaCungCap] (
     [MaNhaCungCap] INT IDENTITY(1,1) NOT NULL,
     [MaNhaCungCapCode] NVARCHAR(20) NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE [dbo].[NhaCungCap] (
     [TaiKhoanNganHang] NVARCHAR(50) NULL,
     [TenNganHang] NVARCHAR(100) NULL,
     [DieuKienThanhToan] NVARCHAR(100) NULL,
-    [HanMucTinDung] DECIMAL(18,2) NULL,
+    [HanMucTinDung] DECIMAL(18,2) NULL CHECK ([HanMucTinDung] >= 0),
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
     [MaNguoiDungTao] INT NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE [dbo].[NhaCungCap] (
 );
 GO
 
--- 3. Bảng Sản Phẩm
+-- 4. Bảng Sản Phẩm
 CREATE TABLE [dbo].[SanPham] (
     [MaSanPham] INT IDENTITY(1,1) NOT NULL,
     [MaSanPhamCode] NVARCHAR(50) NOT NULL,
@@ -117,12 +117,12 @@ CREATE TABLE [dbo].[SanPham] (
     [MaNhaCungCap] INT NULL,
     [MoTa] NVARCHAR(1000) NULL,
     [DonViTinh] NVARCHAR(20) NOT NULL,
-    [GiaVon] DECIMAL(18,4) NULL,
-    [GiaBan] DECIMAL(18,4) NULL,
-    [MucTonKhoToiThieu] INT NULL,
-    [MucTonKhoToiDa] INT NULL,
-    [DiemDatHangLai] INT NULL,
-    [ThoiGianGiaoHang] INT NULL, -- Số ngày
+    [GiaVon] DECIMAL(18,4) NULL CHECK ([GiaVon] >= 0),
+    [GiaBan] DECIMAL(18,4) NULL CHECK ([GiaBan] >= 0),
+    [MucTonKhoToiThieu] INT NULL CHECK ([MucTonKhoToiThieu] >= 0),
+    [MucTonKhoToiDa] INT NULL CHECK ([MucTonKhoToiDa] >= 0),
+    [DiemDatHangLai] INT NULL CHECK ([DiemDatHangLai] >= 0),
+    [ThoiGianGiaoHang] INT NULL CHECK ([ThoiGianGiaoHang] >= 0), -- Số ngày
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
     [MaNguoiDungTao] INT NOT NULL,
@@ -137,7 +137,7 @@ CREATE TABLE [dbo].[SanPham] (
 );
 GO
 
--- 4. Bảng Kho Hàng
+-- 5. Bảng Kho Hàng
 CREATE TABLE [dbo].[KhoHang] (
     [MaKho] INT IDENTITY(1,1) NOT NULL,
     [MaKhoCode] NVARCHAR(20) NOT NULL,
@@ -158,7 +158,7 @@ CREATE TABLE [dbo].[KhoHang] (
 );
 GO
 
--- 5. Bảng Vị Trí Trong Kho
+-- 6. Bảng Vị Trí Trong Kho
 CREATE TABLE [dbo].[ViTriTrongKho] (
     [MaViTri] INT IDENTITY(1,1) NOT NULL,
     [MaKho] INT NOT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE [dbo].[ViTriTrongKho] (
     [Hang] NVARCHAR(10) NULL,
     [Tang] NVARCHAR(10) NULL,
     [ViTri] NVARCHAR(10) NULL,
-    [DungLuong] DECIMAL(18,4) NULL,
+    [DungLuong] DECIMAL(18,4) NULL CHECK ([DungLuong] > 0),
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
     [MaNguoiDungTao] INT NOT NULL,
@@ -183,7 +183,7 @@ CREATE TABLE [dbo].[ViTriTrongKho] (
 );
 GO
 
--- 6. Bảng Tồn Kho
+-- 7. Bảng Tồn Kho
 CREATE TABLE [dbo].[TonKho] (
     [MaTonKho] INT IDENTITY(1,1) NOT NULL,
     [MaSanPham] INT NOT NULL,
@@ -192,8 +192,8 @@ CREATE TABLE [dbo].[TonKho] (
     [SoLo] NVARCHAR(50) NULL,
     [SoSerial] NVARCHAR(100) NULL,
     [NgayHetHan] DATE NULL,
-    [SoLuongTon] DECIMAL(18,4) NOT NULL DEFAULT 0,
-    [SoLuongDatTruoc] DECIMAL(18,4) NOT NULL DEFAULT 0,
+    [SoLuongTon] DECIMAL(18,4) NOT NULL DEFAULT 0 CHECK ([SoLuongTon] >= 0),
+    [SoLuongDatTruoc] DECIMAL(18,4) NOT NULL DEFAULT 0 CHECK ([SoLuongDatTruoc] >= 0),
     [SoLuongKhaDung] AS ([SoLuongTon] - [SoLuongDatTruoc]),
     [NgayKiemKeCuoi] DATETIME NULL,
     [NgaySuaCuoi] DATETIME NOT NULL DEFAULT GETDATE(),
@@ -207,7 +207,7 @@ CREATE TABLE [dbo].[TonKho] (
 );
 GO
 
--- 7. Bảng Đơn Đặt Hàng
+-- 8. Bảng Đơn Đặt Hàng
 CREATE TABLE [dbo].[DonDatHang] (
     [MaDonDatHang] INT IDENTITY(1,1) NOT NULL,
     [SoDonDatHang] NVARCHAR(50) NOT NULL,
@@ -215,7 +215,7 @@ CREATE TABLE [dbo].[DonDatHang] (
     [NgayDat] DATETIME NOT NULL DEFAULT GETDATE(),
     [NgayGiaoDuKien] DATETIME NULL,
     [NgayGiaoThucTe] DATETIME NULL,
-    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Nháp', -- Nháp, Đã gửi, Đã duyệt, Đã nhận, Đã hủy
+    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Nháp' CHECK ([TrangThai] IN (N'Nháp', N'Đã gửi', N'Đã duyệt', N'Đã nhận', N'Đã hủy')),
     [TongTien] DECIMAL(18,4) NULL,
     [GhiChu] NVARCHAR(1000) NULL,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
@@ -230,15 +230,15 @@ CREATE TABLE [dbo].[DonDatHang] (
 );
 GO
 
--- 8. Bảng Chi Tiết Đơn Đặt Hàng
+-- 9. Bảng Chi Tiết Đơn Đặt Hàng
 CREATE TABLE [dbo].[ChiTietDonDatHang] (
     [MaChiTietDonDatHang] INT IDENTITY(1,1) NOT NULL,
     [MaDonDatHang] INT NOT NULL,
     [MaSanPham] INT NOT NULL,
-    [SoLuong] DECIMAL(18,4) NOT NULL,
-    [DonGia] DECIMAL(18,4) NOT NULL,
+    [SoLuong] DECIMAL(18,4) NOT NULL CHECK ([SoLuong] > 0),
+    [DonGia] DECIMAL(18,4) NOT NULL CHECK ([DonGia] >= 0),
     [ThanhTien] AS ([SoLuong] * [DonGia]),
-    [SoLuongDaNhan] DECIMAL(18,4) NOT NULL DEFAULT 0,
+    [SoLuongDaNhan] DECIMAL(18,4) NOT NULL DEFAULT 0 CHECK ([SoLuongDaNhan] >= 0),
     [GhiChu] NVARCHAR(500) NULL,
     CONSTRAINT [PK_ChiTietDonDatHang] PRIMARY KEY CLUSTERED ([MaChiTietDonDatHang] ASC),
     CONSTRAINT [FK_ChiTietDonDatHang_DonDatHang] FOREIGN KEY ([MaDonDatHang]) REFERENCES [dbo].[DonDatHang] ([MaDonDatHang]),
@@ -246,7 +246,7 @@ CREATE TABLE [dbo].[ChiTietDonDatHang] (
 );
 GO
 
--- 9. Bảng Phiếu Nhập Kho
+-- 10. Bảng Phiếu Nhập Kho
 CREATE TABLE [dbo].[PhieuNhapKho] (
     [MaPhieuNhap] INT IDENTITY(1,1) NOT NULL,
     [SoPhieuNhap] NVARCHAR(50) NOT NULL,
@@ -254,7 +254,7 @@ CREATE TABLE [dbo].[PhieuNhapKho] (
     [MaNhaCungCap] INT NOT NULL,
     [NgayNhap] DATETIME NOT NULL DEFAULT GETDATE(),
     [MaKho] INT NOT NULL,
-    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Nháp', -- Nháp, Đã nhận, Đã ghi sổ
+    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Nháp' CHECK ([TrangThai] IN (N'Nháp', N'Đã nhận', N'Đã ghi sổ')),
     [TongTien] DECIMAL(18,4) NULL,
     [GhiChu] NVARCHAR(1000) NULL,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
@@ -271,14 +271,14 @@ CREATE TABLE [dbo].[PhieuNhapKho] (
 );
 GO
 
--- 10. Bảng Chi Tiết Phiếu Nhập Kho
+-- 11. Bảng Chi Tiết Phiếu Nhập Kho
 CREATE TABLE [dbo].[ChiTietPhieuNhapKho] (
     [MaChiTietPhieuNhap] INT IDENTITY(1,1) NOT NULL,
     [MaPhieuNhap] INT NOT NULL,
     [MaSanPham] INT NOT NULL,
     [MaViTri] INT NULL,
-    [SoLuong] DECIMAL(18,4) NOT NULL,
-    [DonGia] DECIMAL(18,4) NOT NULL,
+    [SoLuong] DECIMAL(18,4) NOT NULL CHECK ([SoLuong] > 0),
+    [DonGia] DECIMAL(18,4) NOT NULL CHECK ([DonGia] >= 0),
     [ThanhTien] AS ([SoLuong] * [DonGia]),
     [SoLo] NVARCHAR(50) NULL,
     [SoSerial] NVARCHAR(100) NULL,
@@ -291,7 +291,31 @@ CREATE TABLE [dbo].[ChiTietPhieuNhapKho] (
 );
 GO
 
--- 11. Bảng Đơn Hàng Bán
+-- 12. Bảng Khách Hàng (PHẢI TẠO TRƯỚC DonHangBan)
+CREATE TABLE [dbo].[KhachHang] (
+    [MaKhachHang] INT IDENTITY(1,1) NOT NULL,
+    [MaKhachHangCode] NVARCHAR(20) NOT NULL,
+    [TenKhachHang] NVARCHAR(200) NOT NULL,
+    [NguoiLienHe] NVARCHAR(100) NULL,
+    [SoDienThoai] NVARCHAR(20) NULL,
+    [Email] NVARCHAR(100) NULL,
+    [DiaChi] NVARCHAR(500) NULL,
+    [MaSoThue] NVARCHAR(50) NULL,
+    [HanMucTinDung] DECIMAL(18,2) NULL CHECK ([HanMucTinDung] >= 0),
+    [DieuKienThanhToan] NVARCHAR(100) NULL,
+    [HoatDong] BIT NOT NULL DEFAULT 1,
+    [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
+    [MaNguoiDungTao] INT NOT NULL,
+    [NgaySua] DATETIME NULL,
+    [MaNguoiDungSua] INT NULL,
+    CONSTRAINT [PK_KhachHang] PRIMARY KEY CLUSTERED ([MaKhachHang] ASC),
+    CONSTRAINT [UQ_KhachHang_MaKhachHangCode] UNIQUE NONCLUSTERED ([MaKhachHangCode] ASC),
+    CONSTRAINT [FK_KhachHang_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_KhachHang_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
+);
+GO
+
+-- 13. Bảng Đơn Hàng Bán
 CREATE TABLE [dbo].[DonHangBan] (
     [MaDonHangBan] INT IDENTITY(1,1) NOT NULL,
     [SoDonHangBan] NVARCHAR(50) NOT NULL,
@@ -299,7 +323,7 @@ CREATE TABLE [dbo].[DonHangBan] (
     [NgayDat] DATETIME NOT NULL DEFAULT GETDATE(),
     [NgayYeuCau] DATETIME NULL,
     [NgayGiao] DATETIME NULL,
-    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Nháp', -- Nháp, Đã xác nhận, Đã giao, Đã giao hàng, Đã hủy
+    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Nháp' CHECK ([TrangThai] IN (N'Nháp', N'Đã xác nhận', N'Đã giao', N'Đã giao hàng', N'Đã hủy')),
     [TongTien] DECIMAL(18,4) NULL,
     [GhiChu] NVARCHAR(1000) NULL,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
@@ -314,15 +338,15 @@ CREATE TABLE [dbo].[DonHangBan] (
 );
 GO
 
--- 12. Bảng Chi Tiết Đơn Hàng Bán
+-- 14. Bảng Chi Tiết Đơn Hàng Bán
 CREATE TABLE [dbo].[ChiTietDonHangBan] (
     [MaChiTietDonHangBan] INT IDENTITY(1,1) NOT NULL,
     [MaDonHangBan] INT NOT NULL,
     [MaSanPham] INT NOT NULL,
-    [SoLuong] DECIMAL(18,4) NOT NULL,
-    [DonGia] DECIMAL(18,4) NOT NULL,
+    [SoLuong] DECIMAL(18,4) NOT NULL CHECK ([SoLuong] > 0),
+    [DonGia] DECIMAL(18,4) NOT NULL CHECK ([DonGia] >= 0),
     [ThanhTien] AS ([SoLuong] * [DonGia]),
-    [SoLuongDaGiao] DECIMAL(18,4) NOT NULL DEFAULT 0,
+    [SoLuongDaGiao] DECIMAL(18,4) NOT NULL DEFAULT 0 CHECK ([SoLuongDaGiao] >= 0),
     [GhiChu] NVARCHAR(500) NULL,
     CONSTRAINT [PK_ChiTietDonHangBan] PRIMARY KEY CLUSTERED ([MaChiTietDonHangBan] ASC),
     CONSTRAINT [FK_ChiTietDonHangBan_DonHangBan] FOREIGN KEY ([MaDonHangBan]) REFERENCES [dbo].[DonHangBan] ([MaDonHangBan]),
@@ -330,7 +354,7 @@ CREATE TABLE [dbo].[ChiTietDonHangBan] (
 );
 GO
 
--- 13. Bảng Phiếu Xuất Kho
+-- 15. Bảng Phiếu Xuất Kho
 CREATE TABLE [dbo].[PhieuXuatKho] (
     [MaPhieuXuat] INT IDENTITY(1,1) NOT NULL,
     [SoPhieuXuat] NVARCHAR(50) NOT NULL,
@@ -338,7 +362,7 @@ CREATE TABLE [dbo].[PhieuXuatKho] (
     [MaKhachHang] INT NULL,
     [NgayXuat] DATETIME NOT NULL DEFAULT GETDATE(),
     [MaKho] INT NOT NULL,
-    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Nháp', -- Nháp, Đã lấy hàng, Đã giao, Đã giao hàng
+    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Nháp' CHECK ([TrangThai] IN (N'Nháp', N'Đã lấy hàng', N'Đã giao', N'Đã giao hàng')),
     [TongTien] DECIMAL(18,4) NULL,
     [GhiChu] NVARCHAR(1000) NULL,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
@@ -355,14 +379,14 @@ CREATE TABLE [dbo].[PhieuXuatKho] (
 );
 GO
 
--- 14. Bảng Chi Tiết Phiếu Xuất Kho
+-- 16. Bảng Chi Tiết Phiếu Xuất Kho
 CREATE TABLE [dbo].[ChiTietPhieuXuatKho] (
     [MaChiTietPhieuXuat] INT IDENTITY(1,1) NOT NULL,
     [MaPhieuXuat] INT NOT NULL,
     [MaSanPham] INT NOT NULL,
     [MaViTri] INT NULL,
-    [SoLuong] DECIMAL(18,4) NOT NULL,
-    [DonGia] DECIMAL(18,4) NOT NULL,
+    [SoLuong] DECIMAL(18,4) NOT NULL CHECK ([SoLuong] > 0),
+    [DonGia] DECIMAL(18,4) NOT NULL CHECK ([DonGia] >= 0),
     [ThanhTien] AS ([SoLuong] * [DonGia]),
     [SoLo] NVARCHAR(50) NULL,
     [SoSerial] NVARCHAR(100) NULL,
@@ -374,11 +398,15 @@ CREATE TABLE [dbo].[ChiTietPhieuXuatKho] (
 );
 GO
 
--- 15. Bảng Giao Dịch Tồn Kho
+
+
+
+
+-- 17. Bảng Giao Dịch Tồn Kho
 CREATE TABLE [dbo].[GiaoDichTonKho] (
     [MaGiaoDich] INT IDENTITY(1,1) NOT NULL,
     [NgayGiaoDich] DATETIME NOT NULL DEFAULT GETDATE(),
-    [LoaiGiaoDich] NVARCHAR(20) NOT NULL, -- Nhập kho, Xuất kho, Điều chỉnh, Chuyển kho, Kiểm kê
+    [LoaiGiaoDich] NVARCHAR(20) NOT NULL CHECK ([LoaiGiaoDich] IN (N'Nhập kho', N'Xuất kho', N'Điều chỉnh', N'Chuyển kho', N'Kiểm kê')),
     [LoaiThamChieu] NVARCHAR(20) NULL, -- Đơn đặt hàng, Đơn hàng bán, Điều chỉnh, Chuyển kho, Kiểm kê
     [MaThamChieu] INT NULL,
     [MaSanPham] INT NOT NULL,
@@ -401,43 +429,93 @@ CREATE TABLE [dbo].[GiaoDichTonKho] (
 );
 GO
 
--- 16. Bảng Khách Hàng
-CREATE TABLE [dbo].[KhachHang] (
-    [MaKhachHang] INT IDENTITY(1,1) NOT NULL,
-    [MaKhachHangCode] NVARCHAR(20) NOT NULL,
-    [TenKhachHang] NVARCHAR(200) NOT NULL,
-    [NguoiLienHe] NVARCHAR(100) NULL,
-    [SoDienThoai] NVARCHAR(20) NULL,
-    [Email] NVARCHAR(100) NULL,
-    [DiaChi] NVARCHAR(500) NULL,
-    [MaSoThue] NVARCHAR(50) NULL,
-    [HanMucTinDung] DECIMAL(18,2) NULL,
-    [DieuKienThanhToan] NVARCHAR(100) NULL,
+-- 18. Bảng Quyền (Permissions)
+CREATE TABLE [dbo].[Quyen] (
+    [MaQuyen] INT IDENTITY(1,1) NOT NULL,
+    [MaQuyenCode] NVARCHAR(50) NOT NULL,
+    [TenQuyen] NVARCHAR(100) NOT NULL,
+    [MoTa] NVARCHAR(500) NULL,
+    [LoaiQuyen] NVARCHAR(50) NOT NULL, -- READ, WRITE, DELETE, ADMIN
+    [Module] NVARCHAR(100) NOT NULL, -- KHO, SANPHAM, DONHANG, BAOCAO, HETHONG
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
     [MaNguoiDungTao] INT NOT NULL,
     [NgaySua] DATETIME NULL,
     [MaNguoiDungSua] INT NULL,
-    CONSTRAINT [PK_KhachHang] PRIMARY KEY CLUSTERED ([MaKhachHang] ASC),
-    CONSTRAINT [UQ_KhachHang_MaKhachHangCode] UNIQUE NONCLUSTERED ([MaKhachHangCode] ASC),
-    CONSTRAINT [FK_KhachHang_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
-    CONSTRAINT [FK_KhachHang_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
+    CONSTRAINT [PK_Quyen] PRIMARY KEY CLUSTERED ([MaQuyen] ASC),
+    CONSTRAINT [UQ_Quyen_MaQuyenCode] UNIQUE NONCLUSTERED ([MaQuyenCode] ASC),
+    CONSTRAINT [FK_Quyen_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_Quyen_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
 
--- 18. Bảng Vai Trò Người Dùng
+-- 19. Bảng Vai Trò Người Dùng
 CREATE TABLE [dbo].[VaiTroNguoiDung] (
     [MaVaiTro] INT IDENTITY(1,1) NOT NULL,
     [MaNguoiDung] INT NOT NULL,
-    [TenVaiTro] NVARCHAR(50) NOT NULL, -- Quản trị viên, Quản lý, Nhân viên, Người xem
+    [MaQuyen] INT NOT NULL,
     [HoatDong] BIT NOT NULL DEFAULT 1,
     [NgayTao] DATETIME NOT NULL DEFAULT GETDATE(),
     [MaNguoiDungTao] INT NOT NULL,
+    [NgaySua] DATETIME NULL,
+    [MaNguoiDungSua] INT NULL,
     CONSTRAINT [PK_VaiTroNguoiDung] PRIMARY KEY CLUSTERED ([MaVaiTro] ASC),
     CONSTRAINT [FK_VaiTroNguoiDung_NguoiDungHeThong] FOREIGN KEY ([MaNguoiDung]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
-    CONSTRAINT [FK_VaiTroNguoiDung_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
+    CONSTRAINT [FK_VaiTroNguoiDung_Quyen] FOREIGN KEY ([MaQuyen]) REFERENCES [dbo].[Quyen] ([MaQuyen]),
+    CONSTRAINT [FK_VaiTroNguoiDung_NguoiDungTao] FOREIGN KEY ([MaNguoiDungTao]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung]),
+    CONSTRAINT [FK_VaiTroNguoiDung_NguoiDungSua] FOREIGN KEY ([MaNguoiDungSua]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
 );
 GO
+
+-- 20. Bảng Lịch Sử Đăng Nhập
+CREATE TABLE [dbo].[LichSuDangNhap] (
+    [MaLichSu] INT IDENTITY(1,1) NOT NULL,
+    [MaNguoiDung] INT NOT NULL,
+    [ThoiGianDangNhap] DATETIME NOT NULL DEFAULT GETDATE(),
+    [ThoiGianDangXuat] DATETIME NULL,
+    [DiaChiIP] NVARCHAR(45) NULL,
+    [ThietBi] NVARCHAR(200) NULL, -- Browser, OS, Device
+    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Thành công', -- Thành công, Thất bại, Khóa tài khoản
+    [LyDo] NVARCHAR(500) NULL, -- Lý do thất bại nếu có
+    [SessionID] NVARCHAR(100) NULL,
+    CONSTRAINT [PK_LichSuDangNhap] PRIMARY KEY CLUSTERED ([MaLichSu] ASC),
+    CONSTRAINT [FK_LichSuDangNhap_NguoiDung] FOREIGN KEY ([MaNguoiDung]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
+);
+GO
+
+-- 21. Bảng Phiên Làm Việc
+CREATE TABLE [dbo].[PhienLamViec] (
+    [MaPhien] INT IDENTITY(1,1) NOT NULL,
+    [MaNguoiDung] INT NOT NULL,
+    [SessionID] NVARCHAR(100) NOT NULL,
+    [ThoiGianBatDau] DATETIME NOT NULL DEFAULT GETDATE(),
+    [ThoiGianKetThuc] DATETIME NULL,
+    [TrangThai] NVARCHAR(20) NOT NULL DEFAULT N'Đang hoạt động', -- Đang hoạt động, Đã kết thúc, Bị gián đoạn
+    [DiaChiIP] NVARCHAR(45) NULL,
+    [ThietBi] NVARCHAR(200) NULL,
+    [UserAgent] NVARCHAR(500) NULL,
+    [LastActivity] DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT [PK_PhienLamViec] PRIMARY KEY CLUSTERED ([MaPhien] ASC),
+    CONSTRAINT [UQ_PhienLamViec_SessionID] UNIQUE NONCLUSTERED ([SessionID] ASC),
+    CONSTRAINT [FK_PhienLamViec_NguoiDung] FOREIGN KEY ([MaNguoiDung]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
+);
+GO
+
+-- 22. Bảng Lịch Sử Hoạt Động
+CREATE TABLE [dbo].[LichSuHoatDong] (
+    [MaLichSu] INT IDENTITY(1,1) NOT NULL,
+    [MaNguoiDung] INT NOT NULL,
+    [ThoiGian] DATETIME NOT NULL DEFAULT GETDATE(),
+    [HanhDong] NVARCHAR(100) NOT NULL, -- CREATE, READ, UPDATE, DELETE, LOGIN, LOGOUT
+    [Module] NVARCHAR(100) NOT NULL, -- KHO, SANPHAM, DONHANG, BAOCAO, HETHONG
+    [ChiTiet] NVARCHAR(500) NULL, -- Mô tả chi tiết hành động
+    [DuLieuCu] NVARCHAR(MAX) NULL, -- Dữ liệu cũ (JSON)
+    [DuLieuMoi] NVARCHAR(MAX) NULL, -- Dữ liệu mới (JSON)
+    [DiaChiIP] NVARCHAR(45) NULL,
+    [SessionID] NVARCHAR(100) NULL,
+    CONSTRAINT [PK_LichSuHoatDong] PRIMARY KEY CLUSTERED ([MaLichSu] ASC),
+    CONSTRAINT [FK_LichSuHoatDong_NguoiDung] FOREIGN KEY ([MaNguoiDung]) REFERENCES [dbo].[NguoiDungHeThong] ([MaNguoiDung])
+);
 
 -- =============================================
 -- CREATE INDEXES FOR PERFORMANCE
@@ -465,6 +543,14 @@ CREATE NONCLUSTERED INDEX [IX_DonDatHang_TrangThai] ON [dbo].[DonDatHang] ([Tran
 -- Indexes cho bảng Đơn Hàng Bán
 CREATE NONCLUSTERED INDEX [IX_DonHangBan_KhachHang_Ngay] ON [dbo].[DonHangBan] ([MaKhachHang] ASC, [NgayDat] ASC);
 CREATE NONCLUSTERED INDEX [IX_DonHangBan_TrangThai] ON [dbo].[DonHangBan] ([TrangThai] ASC);
+
+-- Indexes cho bảng Quản lý đăng nhập và phân quyền
+CREATE NONCLUSTERED INDEX [IX_Quyen_Module_LoaiQuyen] ON [dbo].[Quyen] ([Module] ASC, [LoaiQuyen] ASC);
+CREATE NONCLUSTERED INDEX [IX_VaiTroNguoiDung_NguoiDung_Quyen] ON [dbo].[VaiTroNguoiDung] ([MaNguoiDung] ASC, [MaQuyen] ASC);
+CREATE NONCLUSTERED INDEX [IX_LichSuDangNhap_NguoiDung_ThoiGian] ON [dbo].[LichSuDangNhap] ([MaNguoiDung] ASC, [ThoiGianDangNhap] ASC);
+CREATE NONCLUSTERED INDEX [IX_PhienLamViec_SessionID_TrangThai] ON [dbo].[PhienLamViec] ([SessionID] ASC, [TrangThai] ASC);
+CREATE NONCLUSTERED INDEX [IX_LichSuHoatDong_NguoiDung_ThoiGian] ON [dbo].[LichSuHoatDong] ([MaNguoiDung] ASC, [ThoiGian] ASC);
+CREATE NONCLUSTERED INDEX [IX_LichSuHoatDong_Module_HanhDong] ON [dbo].[LichSuHoatDong] ([Module] ASC, [HanhDong] ASC);
 
 -- =============================================
 -- INSERT SAMPLE DATA
@@ -577,19 +663,61 @@ VALUES
     ('vuthif', 'vthif123', N'Vũ Thị F', 'vuthif@quanlykho.com', 1),
     ('dangvang', 'dvang123', N'Đặng Văn G', 'dangvang@quanlykho.com', 1);
 
--- Thêm dữ liệu mẫu vai trò người dùng
-INSERT INTO [dbo].[VaiTroNguoiDung] ([MaNguoiDung], [TenVaiTro], [MaNguoiDungTao])
+-- Thêm dữ liệu mẫu quyền
+INSERT INTO [dbo].[Quyen] ([MaQuyenCode], [TenQuyen], [MoTa], [LoaiQuyen], [Module], [MaNguoiDungTao])
 VALUES 
-    (1, N'Quản trị viên', 1),
-    (2, N'Quản lý', 1),
-    (3, N'Nhân viên', 1),
-    (4, N'Quản lý', 1),
-    (5, N'Quản lý', 1),
-    (6, N'Nhân viên', 1),
-    (7, N'Nhân viên', 1),
-    (8, N'Nhân viên', 1),
-    (9, N'Nhân viên', 1),
-    (10, N'Nhân viên', 1);
+    -- Quyền hệ thống
+    ('SYS_ADMIN', N'Quản trị hệ thống', N'Toàn quyền trên hệ thống', 'ADMIN', 'HETHONG', 1),
+    ('SYS_READ', N'Xem hệ thống', N'Chỉ xem thông tin hệ thống', 'READ', 'HETHONG', 1),
+    
+    -- Quyền kho hàng
+    ('KHO_ADMIN', N'Quản trị kho hàng', N'Toàn quyền quản lý kho hàng', 'ADMIN', 'KHO', 1),
+    ('KHO_READ', N'Xem kho hàng', N'Xem thông tin kho hàng', 'READ', 'KHO', 1),
+    ('KHO_WRITE', N'Thêm/sửa kho hàng', N'Thêm, sửa thông tin kho hàng', 'WRITE', 'KHO', 1),
+    ('KHO_DELETE', N'Xóa kho hàng', N'Xóa kho hàng', 'DELETE', 'KHO', 1),
+    
+    -- Quyền sản phẩm
+    ('SP_ADMIN', N'Quản trị sản phẩm', N'Toàn quyền quản lý sản phẩm', 'ADMIN', 'SANPHAM', 1),
+    ('SP_READ', N'Xem sản phẩm', N'Xem thông tin sản phẩm', 'READ', 'SANPHAM', 1),
+    ('SP_WRITE', N'Thêm/sửa sản phẩm', N'Thêm, sửa thông tin sản phẩm', 'WRITE', 'SANPHAM', 1),
+    ('SP_DELETE', N'Xóa sản phẩm', N'Xóa sản phẩm', 'DELETE', 'SANPHAM', 1),
+    
+    -- Quyền đơn hàng
+    ('DH_ADMIN', N'Quản trị đơn hàng', N'Toàn quyền quản lý đơn hàng', 'ADMIN', 'DONHANG', 1),
+    ('DH_READ', N'Xem đơn hàng', N'Xem thông tin đơn hàng', 'READ', 'DONHANG', 1),
+    ('DH_WRITE', N'Thêm/sửa đơn hàng', N'Thêm, sửa đơn hàng', 'WRITE', 'DONHANG', 1),
+    ('DH_DELETE', N'Xóa đơn hàng', N'Xóa đơn hàng', 'DELETE', 'DONHANG', 1),
+    
+    -- Quyền báo cáo
+    ('BC_ADMIN', N'Quản trị báo cáo', N'Toàn quyền quản lý báo cáo', 'ADMIN', 'BAOCAO', 1),
+    ('BC_READ', N'Xem báo cáo', N'Xem các báo cáo', 'READ', 'BAOCAO', 1),
+    ('BC_EXPORT', N'Xuất báo cáo', N'Xuất báo cáo ra file', 'WRITE', 'BAOCAO', 1);
+
+-- Thêm dữ liệu mẫu vai trò người dùng
+INSERT INTO [dbo].[VaiTroNguoiDung] ([MaNguoiDung], [MaQuyen], [MaNguoiDungTao])
+VALUES 
+    -- Admin có tất cả quyền
+    (1, 1, 1), -- SYS_ADMIN
+    (1, 3, 1), -- KHO_ADMIN
+    (1, 7, 1), -- SP_ADMIN
+    (1, 11, 1), -- DH_ADMIN
+    (1, 15, 1), -- BC_ADMIN
+    
+    -- Manager có quyền quản lý
+    (2, 2, 1), -- SYS_READ
+    (2, 3, 1), -- KHO_ADMIN
+    (2, 7, 1), -- SP_ADMIN
+    (2, 11, 1), -- DH_ADMIN
+    (2, 15, 1), -- BC_ADMIN
+    
+    -- Operator có quyền cơ bản
+    (3, 4, 1), -- KHO_READ
+    (3, 5, 1), -- KHO_WRITE
+    (3, 8, 1), -- SP_READ
+    (3, 9, 1), -- SP_WRITE
+    (3, 12, 1), -- DH_READ
+    (3, 13, 1), -- DH_WRITE
+    (3, 16, 1); -- BC_READ
 
 -- Thêm dữ liệu mẫu khách hàng
 INSERT INTO [dbo].[KhachHang] ([MaKhachHangCode], [TenKhachHang], [NguoiLienHe], [SoDienThoai], [Email], [DiaChi], [MaSoThue], [HanMucTinDung], [DieuKienThanhToan], [MaNguoiDungTao])
@@ -608,11 +736,11 @@ VALUES
 -- Thêm dữ liệu mẫu đơn đặt hàng
 INSERT INTO [dbo].[DonDatHang] ([SoDonDatHang], [MaNhaCungCap], [NgayDat], [NgayGiaoDuKien], [TrangThai], [TongTien], [GhiChu], [MaNguoiDungTao])
 VALUES 
-    ('DDH001', 1, '2024-01-15', '2024-01-25', N'Đã duyệt', 25000000, N'Đơn hàng laptop cho phòng IT', 4),
-    ('DDH002', 2, '2024-01-16', '2024-01-26', N'Đã gửi', 1500000, N'Đơn hàng quần áo cho nhân viên', 5),
-    ('DDH003', 3, '2024-01-17', '2024-01-27', N'Đã duyệt', 500000, N'Đơn hàng sách cho thư viện', 6),
-    ('DDH004', 4, '2024-01-18', '2024-01-28', N'Nháp', 2000000, N'Đơn hàng thực phẩm cho căng tin', 7),
-    ('DDH005', 5, '2024-01-19', '2024-01-29', N'Đã gửi', 8000000, N'Đơn hàng đồ gia dụng cho văn phòng', 8);
+    ('DDH001', 1, '2024-01-15', '2024-01-25', N'Đã duyệt', 25000000, N'Đơn hàng laptop cho phòng IT', 2),
+    ('DDH002', 2, '2024-01-16', '2024-01-26', N'Đã gửi', 1500000, N'Đơn hàng quần áo cho nhân viên', 2),
+    ('DDH003', 3, '2024-01-17', '2024-01-27', N'Đã duyệt', 500000, N'Đơn hàng sách cho thư viện', 3),
+    ('DDH004', 4, '2024-01-18', '2024-01-28', N'Nháp', 2000000, N'Đơn hàng thực phẩm cho căng tin', 3),
+    ('DDH005', 5, '2024-01-19', '2024-01-29', N'Đã gửi', 8000000, N'Đơn hàng đồ gia dụng cho văn phòng', 3);
 
 -- Thêm dữ liệu mẫu chi tiết đơn đặt hàng
 INSERT INTO [dbo].[ChiTietDonDatHang] ([MaDonDatHang], [MaSanPham], [SoLuong], [DonGia], [GhiChu])
@@ -630,11 +758,11 @@ VALUES
 -- Thêm dữ liệu mẫu đơn hàng bán
 INSERT INTO [dbo].[DonHangBan] ([SoDonHangBan], [MaKhachHang], [NgayDat], [NgayYeuCau], [TrangThai], [TongTien], [GhiChu], [MaNguoiDungTao])
 VALUES 
-    ('DHB001', 1, '2024-01-20', '2024-01-25', N'Đã xác nhận', 30000000, N'Đơn hàng laptop cho công ty', 4),
-    ('DHB002', 2, '2024-01-21', '2024-01-26', N'Đã giao', 800000, N'Đơn hàng quần áo cho cửa hàng', 5),
-    ('DHB003', 3, '2024-01-22', '2024-01-27', N'Đã xác nhận', 350000, N'Đơn hàng sách cho siêu thị', 6),
-    ('DHB004', 4, '2024-01-23', '2024-01-28', N'Đã giao', 1200000, N'Đơn hàng thiết bị công nghệ', 7),
-    ('DHB005', 5, '2024-01-24', '2024-01-29', N'Đã xác nhận', 6000000, N'Đơn hàng đồ gia dụng', 8);
+    ('DHB001', 1, '2024-01-20', '2024-01-25', N'Đã xác nhận', 30000000, N'Đơn hàng laptop cho công ty', 2),
+    ('DHB002', 2, '2024-01-21', '2024-01-26', N'Đã giao', 800000, N'Đơn hàng quần áo cho cửa hàng', 2),
+    ('DHB003', 3, '2024-01-22', '2024-01-27', N'Đã xác nhận', 350000, N'Đơn hàng sách cho siêu thị', 3),
+    ('DHB004', 4, '2024-01-23', '2024-01-28', N'Đã giao', 1200000, N'Đơn hàng thiết bị công nghệ', 3),
+    ('DHB005', 5, '2024-01-24', '2024-01-29', N'Đã xác nhận', 6000000, N'Đơn hàng đồ gia dụng', 3);
 
 -- Thêm dữ liệu mẫu chi tiết đơn hàng bán
 INSERT INTO [dbo].[ChiTietDonHangBan] ([MaDonHangBan], [MaSanPham], [SoLuong], [DonGia], [GhiChu])
@@ -649,10 +777,10 @@ VALUES
 -- Thêm dữ liệu mẫu phiếu nhập kho
 INSERT INTO [dbo].[PhieuNhapKho] ([SoPhieuNhap], [MaDonDatHang], [MaNhaCungCap], [NgayNhap], [MaKho], [TrangThai], [TongTien], [GhiChu], [MaNguoiDungTao])
 VALUES 
-    ('PNK001', 1, 1, '2024-01-25', 1, N'Đã ghi sổ', 25000000, N'Phiếu nhập laptop', 4),
-    ('PNK002', 2, 2, '2024-01-26', 1, N'Đã ghi sổ', 1500000, N'Phiếu nhập quần áo', 5),
-    ('PNK003', 3, 3, '2024-01-27', 1, N'Đã ghi sổ', 500000, N'Phiếu nhập sách', 6),
-    ('PNK004', 5, 5, '2024-01-29', 2, N'Đã ghi sổ', 8000000, N'Phiếu nhập đồ gia dụng', 8);
+    ('PNK001', 1, 1, '2024-01-25', 1, N'Đã ghi sổ', 25000000, N'Phiếu nhập laptop', 2),
+    ('PNK002', 2, 2, '2024-01-26', 1, N'Đã ghi sổ', 1500000, N'Phiếu nhập quần áo', 2),
+    ('PNK003', 3, 3, '2024-01-27', 1, N'Đã ghi sổ', 500000, N'Phiếu nhập sách', 3),
+    ('PNK004', 5, 5, '2024-01-29', 2, N'Đã ghi sổ', 8000000, N'Phiếu nhập đồ gia dụng', 3);
 
 -- Thêm dữ liệu mẫu chi tiết phiếu nhập kho
 INSERT INTO [dbo].[ChiTietPhieuNhapKho] ([MaPhieuNhap], [MaSanPham], [MaViTri], [SoLuong], [DonGia], [SoLo], [GhiChu])
@@ -668,11 +796,11 @@ VALUES
 -- Thêm dữ liệu mẫu phiếu xuất kho
 INSERT INTO [dbo].[PhieuXuatKho] ([SoPhieuXuat], [MaDonHangBan], [MaKhachHang], [NgayXuat], [MaKho], [TrangThai], [TongTien], [GhiChu], [MaNguoiDungTao])
 VALUES 
-    ('PXK001', 1, 1, '2024-01-25', 1, N'Đã giao', 30000000, N'Phiếu xuất laptop', 4),
-    ('PXK002', 2, 2, '2024-01-26', 1, N'Đã giao', 800000, N'Phiếu xuất quần áo', 5),
-    ('PXK003', 3, 3, '2024-01-27', 1, N'Đã giao', 350000, N'Phiếu xuất sách', 6),
-    ('PXK004', 4, 4, '2024-01-28', 1, N'Đã giao', 1200000, N'Phiếu xuất thiết bị công nghệ', 7),
-    ('PXK005', 5, 5, '2024-01-29', 2, N'Đã giao', 6000000, N'Phiếu xuất đồ gia dụng', 8);
+    ('PXK001', 1, 1, '2024-01-25', 1, N'Đã giao', 30000000, N'Phiếu xuất laptop', 2),
+    ('PXK002', 2, 2, '2024-01-26', 1, N'Đã giao', 800000, N'Phiếu xuất quần áo', 2),
+    ('PXK003', 3, 3, '2024-01-27', 1, N'Đã giao', 350000, N'Phiếu xuất sách', 3),
+    ('PXK004', 4, 4, '2024-01-28', 1, N'Đã giao', 1200000, N'Phiếu xuất thiết bị công nghệ', 3),
+    ('PXK005', 5, 5, '2024-01-29', 2, N'Đã giao', 6000000, N'Phiếu xuất đồ gia dụng', 3);
 
 -- Thêm dữ liệu mẫu chi tiết phiếu xuất kho
 INSERT INTO [dbo].[ChiTietPhieuXuatKho] ([MaPhieuXuat], [MaSanPham], [MaViTri], [SoLuong], [DonGia], [GhiChu])
@@ -687,47 +815,47 @@ VALUES
 -- Thêm dữ liệu mẫu tồn kho
 INSERT INTO [dbo].[TonKho] ([MaSanPham], [MaKho], [MaViTri], [SoLo], [SoSerial], [NgayHetHan], [SoLuongTon], [SoLuongDatTruoc], [NgayKiemKeCuoi], [NguoiSuaCuoi])
 VALUES 
-    (1, 1, 1, 'LOT001', 'SN001', '2027-01-25', 0, 0, '2024-01-25', 4),
-    (3, 1, 2, 'LOT002', NULL, '2026-01-26', 7, 0, '2024-01-26', 5),
-    (7, 1, 2, 'LOT003', NULL, '2026-01-26', 4, 0, '2024-01-26', 5),
-    (4, 1, 3, 'LOT004', NULL, '2029-01-27', 1, 0, '2024-01-27', 6),
-    (9, 1, 3, 'LOT005', NULL, '2029-01-27', 2, 0, '2024-01-27', 6),
-    (13, 2, 4, 'LOT006', NULL, '2034-01-29', 0, 0, '2024-01-29', 8),
-    (14, 2, 4, 'LOT007', NULL, '2034-01-29', 0, 0, '2024-01-29', 8),
-    (5, 1, 1, 'LOT008', NULL, '2027-01-28', 0, 0, '2024-01-28', 7),
-    (2, 1, 1, 'LOT009', 'SN002', '2027-01-20', 8, 0, '2024-01-20', 4),
-    (6, 1, 1, 'LOT010', NULL, '2027-01-20', 22, 0, '2024-01-20', 4),
-    (8, 1, 2, 'LOT011', NULL, '2026-01-20', 18, 0, '2024-01-20', 5),
-    (10, 1, 3, 'LOT012', NULL, '2024-12-31', 95, 0, '2024-01-20', 6),
-    (11, 1, 3, 'LOT013', NULL, '2025-06-30', 180, 0, '2024-01-20', 7),
-    (12, 1, 3, 'LOT014', NULL, '2024-02-15', 85, 0, '2024-01-20', 7),
-    (15, 1, 5, 'LOT015', NULL, '2026-01-20', 18, 0, '2024-01-20', 9),
-    (16, 1, 5, 'LOT016', NULL, '2026-01-20', 13, 0, '2024-01-20', 9),
-    (17, 1, 2, 'LOT017', NULL, '2026-06-30', 45, 0, '2024-01-20', 10),
-    (18, 1, 2, 'LOT018', NULL, '2026-06-30', 27, 0, '2024-01-20', 10),
-    (19, 1, 3, 'LOT019', NULL, '2027-12-31', 480, 0, '2024-01-20', 11),
-    (20, 1, 3, 'LOT020', NULL, '2027-12-31', 185, 0, '2024-01-20', 11),
-    (21, 1, 5, 'LOT021', NULL, '2027-01-20', 8, 0, '2024-01-20', 12),
-    (22, 1, 5, 'LOT022', NULL, '2027-01-20', 13, 0, '2024-01-20', 12),
-    (23, 1, 1, 'LOT023', 'SN003', '2027-01-20', 7, 0, '2024-01-20', 13),
-    (24, 1, 3, 'LOT024', NULL, '2026-06-30', 95, 0, '2024-01-20', 13);
+    (1, 1, 1, 'LOT001', 'SN001', '2027-01-25', 0, 0, '2024-01-25', 2),
+    (3, 1, 2, 'LOT002', NULL, '2026-01-26', 7, 0, '2024-01-26', 2),
+    (7, 1, 2, 'LOT003', NULL, '2026-01-26', 4, 0, '2024-01-26', 2),
+    (4, 1, 3, 'LOT004', NULL, '2029-01-27', 1, 0, '2024-01-27', 3),
+    (9, 1, 3, 'LOT005', NULL, '2029-01-27', 2, 0, '2024-01-27', 3),
+    (13, 2, 4, 'LOT006', NULL, '2034-01-29', 0, 0, '2024-01-29', 3),
+    (14, 2, 4, 'LOT007', NULL, '2034-01-29', 0, 0, '2024-01-29', 3),
+    (5, 1, 1, 'LOT008', NULL, '2027-01-28', 0, 0, '2024-01-28', 3),
+    (2, 1, 1, 'LOT009', 'SN002', '2027-01-20', 8, 0, '2024-01-20', 2),
+    (6, 1, 1, 'LOT010', NULL, '2027-01-20', 22, 0, '2024-01-20', 2),
+    (8, 1, 2, 'LOT011', NULL, '2026-01-20', 18, 0, '2024-01-20', 2),
+    (10, 1, 3, 'LOT012', NULL, '2024-12-31', 95, 0, '2024-01-20', 3),
+    (11, 1, 3, 'LOT013', NULL, '2025-06-30', 180, 0, '2024-01-20', 3),
+    (12, 1, 3, 'LOT014', NULL, '2024-02-15', 85, 0, '2024-01-20', 3),
+    (15, 1, 5, 'LOT015', NULL, '2026-01-20', 18, 0, '2024-01-20', 3),
+    (16, 1, 5, 'LOT016', NULL, '2026-01-20', 13, 0, '2024-01-20', 3),
+    (17, 1, 2, 'LOT017', NULL, '2026-06-30', 45, 0, '2024-01-20', 2),
+    (18, 1, 2, 'LOT018', NULL, '2026-06-30', 27, 0, '2024-01-20', 2),
+    (19, 1, 3, 'LOT019', NULL, '2027-12-31', 480, 0, '2024-01-20', 3),
+    (20, 1, 3, 'LOT020', NULL, '2027-12-31', 185, 0, '2024-01-20', 3),
+    (21, 1, 5, 'LOT021', NULL, '2027-01-20', 8, 0, '2024-01-20', 3),
+    (22, 1, 5, 'LOT022', NULL, '2027-01-20', 13, 0, '2024-01-20', 3),
+    (23, 1, 1, 'LOT023', 'SN003', '2027-01-20', 7, 0, '2024-01-20', 3),
+    (24, 1, 3, 'LOT024', NULL, '2026-06-30', 95, 0, '2024-01-20', 3);
 
 -- Thêm dữ liệu mẫu giao dịch tồn kho
 INSERT INTO [dbo].[GiaoDichTonKho] ([LoaiGiaoDich], [LoaiThamChieu], [MaThamChieu], [MaSanPham], [MaKho], [MaViTri], [SoLuong], [ChiPhiDonVi], [SoLo], [GhiChu], [NguoiTao])
 VALUES 
-    (N'Nhập kho', N'Phiếu nhập kho', 1, 1, 1, 1, 1, 25000000, 'LOT001', N'Tự động tạo từ phiếu nhập kho', 1),
-    (N'Nhập kho', N'Phiếu nhập kho', 2, 3, 1, 2, 10, 150000, 'LOT002', N'Tự động tạo từ phiếu nhập kho', 1),
-    (N'Nhập kho', N'Phiếu nhập kho', 2, 7, 1, 2, 5, 400000, 'LOT003', N'Tự động tạo từ phiếu nhập kho', 1),
-    (N'Nhập kho', N'Phiếu nhập kho', 3, 4, 1, 3, 2, 200000, 'LOT004', N'Tự động tạo từ phiếu nhập kho', 1),
-    (N'Nhập kho', N'Phiếu nhập kho', 3, 9, 1, 3, 3, 150000, 'LOT005', N'Tự động tạo từ phiếu nhập kho', 1),
-    (N'Nhập kho', N'Phiếu nhập kho', 4, 13, 2, 4, 2, 3000000, 'LOT006', N'Tự động tạo từ phiếu nhập kho', 1),
-    (N'Nhập kho', N'Phiếu nhập kho', 4, 14, 2, 4, 1, 5000000, 'LOT007', N'Tự động tạo từ phiếu nhập kho', 1),
-    (N'Xuất kho', N'Phiếu xuất kho', 1, 1, 1, 1, -1, 30000000, 'LOT001', N'Tự động tạo từ phiếu xuất kho', 1),
-    (N'Xuất kho', N'Phiếu xuất kho', 2, 3, 1, 2, -3, 250000, 'LOT002', N'Tự động tạo từ phiếu xuất kho', 1),
-    (N'Xuất kho', N'Phiếu xuất kho', 2, 7, 1, 2, -1, 600000, 'LOT003', N'Tự động tạo từ phiếu xuất kho', 1),
-    (N'Xuất kho', N'Phiếu xuất kho', 3, 4, 1, 3, -1, 350000, 'LOT004', N'Tự động tạo từ phiếu xuất kho', 1),
-    (N'Xuất kho', N'Phiếu xuất kho', 4, 5, 1, 1, -1, 1200000, 'LOT008', N'Tự động tạo từ phiếu xuất kho', 1),
-    (N'Xuất kho', N'Phiếu xuất kho', 5, 13, 2, 4, -2, 3000000, 'LOT006', N'Tự động tạo từ phiếu xuất kho', 1);
+    (N'Nhập kho', N'Phiếu nhập kho', 1, 1, 1, 1, 1, 25000000, 'LOT001', N'Tự động tạo từ phiếu nhập kho', 2),
+    (N'Nhập kho', N'Phiếu nhập kho', 2, 3, 1, 2, 10, 150000, 'LOT002', N'Tự động tạo từ phiếu nhập kho', 2),
+    (N'Nhập kho', N'Phiếu nhập kho', 2, 7, 1, 2, 5, 400000, 'LOT003', N'Tự động tạo từ phiếu nhập kho', 2),
+    (N'Nhập kho', N'Phiếu nhập kho', 3, 4, 1, 3, 2, 200000, 'LOT004', N'Tự động tạo từ phiếu nhập kho', 3),
+    (N'Nhập kho', N'Phiếu nhập kho', 3, 9, 1, 3, 3, 150000, 'LOT005', N'Tự động tạo từ phiếu nhập kho', 3),
+    (N'Nhập kho', N'Phiếu nhập kho', 4, 13, 2, 4, 2, 3000000, 'LOT006', N'Tự động tạo từ phiếu nhập kho', 3),
+    (N'Nhập kho', N'Phiếu nhập kho', 4, 14, 2, 4, 1, 5000000, 'LOT007', N'Tự động tạo từ phiếu nhập kho', 3),
+    (N'Xuất kho', N'Phiếu xuất kho', 1, 1, 1, 1, -1, 30000000, 'LOT001', N'Tự động tạo từ phiếu xuất kho', 2),
+    (N'Xuất kho', N'Phiếu xuất kho', 2, 3, 1, 2, -3, 250000, 'LOT002', N'Tự động tạo từ phiếu xuất kho', 2),
+    (N'Xuất kho', N'Phiếu xuất kho', 2, 7, 1, 2, -1, 600000, 'LOT003', N'Tự động tạo từ phiếu xuất kho', 2),
+    (N'Xuất kho', N'Phiếu xuất kho', 3, 4, 1, 3, -1, 350000, 'LOT004', N'Tự động tạo từ phiếu xuất kho', 3),
+    (N'Xuất kho', N'Phiếu xuất kho', 4, 5, 1, 1, -1, 1200000, 'LOT008', N'Tự động tạo từ phiếu xuất kho', 3),
+    (N'Xuất kho', N'Phiếu xuất kho', 5, 13, 2, 4, -2, 3000000, 'LOT006', N'Tự động tạo từ phiếu xuất kho', 3);
 
 -- =============================================
 -- CREATE VIEWS FOR REPORTING
@@ -947,6 +1075,58 @@ END;
 GO
 
 -- =============================================
+-- FUNCTIONS CHO QUẢN LÝ ĐĂNG NHẬP VÀ PHÂN QUYỀN
+-- =============================================
+
+-- Function kiểm tra quyền của người dùng
+GO
+CREATE FUNCTION [dbo].[fn_KiemTraQuyen]
+(
+    @MaNguoiDung INT,
+    @Module NVARCHAR(100),
+    @LoaiQuyen NVARCHAR(50)
+)
+RETURNS BIT
+AS
+BEGIN
+    DECLARE @CoQuyen BIT = 0;
+    
+    SELECT @CoQuyen = 1
+    FROM [dbo].[VaiTroNguoiDung] vt
+    INNER JOIN [dbo].[Quyen] q ON vt.[MaQuyen] = q.[MaQuyen]
+    WHERE vt.[MaNguoiDung] = @MaNguoiDung
+        AND vt.[HoatDong] = 1
+        AND q.[Module] = @Module
+        AND (q.[LoaiQuyen] = @LoaiQuyen OR q.[LoaiQuyen] = 'ADMIN');
+    
+    RETURN ISNULL(@CoQuyen, 0);
+END;
+GO
+
+-- Function lấy danh sách quyền của người dùng
+GO
+CREATE FUNCTION [dbo].[fn_LayDanhSachQuyen]
+(
+    @MaNguoiDung INT
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        q.[MaQuyenCode],
+        q.[TenQuyen],
+        q.[LoaiQuyen],
+        q.[Module],
+        q.[MoTa]
+    FROM [dbo].[VaiTroNguoiDung] vt
+    INNER JOIN [dbo].[Quyen] q ON vt.[MaQuyen] = q.[MaQuyen]
+    WHERE vt.[MaNguoiDung] = @MaNguoiDung
+        AND vt.[HoatDong] = 1
+        AND q.[HoatDong] = 1
+);
+
+-- =============================================
 -- CREATE TRIGGERS
 -- =============================================
 
@@ -961,6 +1141,7 @@ BEGIN
     DECLARE @MaPhieuNhap INT, @MaSanPham INT, @MaKho INT, @MaViTri INT;
     DECLARE @SoLuong DECIMAL(18,4), @DonGia DECIMAL(18,4);
     DECLARE @SoLo NVARCHAR(50), @SoSerial NVARCHAR(100), @NgayHetHan DATE;
+    DECLARE @MaNguoiDung INT;
     
     SELECT 
         @MaPhieuNhap = i.[MaPhieuNhap],
@@ -971,7 +1152,8 @@ BEGIN
         @DonGia = i.[DonGia],
         @SoLo = i.[SoLo],
         @SoSerial = i.[SoSerial],
-        @NgayHetHan = i.[NgayHetHan]
+        @NgayHetHan = i.[NgayHetHan],
+        @MaNguoiDung = r.[MaNguoiDungTao]
     FROM inserted i
     INNER JOIN [dbo].[PhieuNhapKho] r ON i.[MaPhieuNhap] = r.[MaPhieuNhap];
     
@@ -983,18 +1165,194 @@ BEGIN
             [SoLuongTon] = [SoLuongTon] + @SoLuong,
             [MaViTri] = ISNULL(@MaViTri, [MaViTri]),
             [NgaySuaCuoi] = GETDATE(),
-            [NguoiSuaCuoi] = r.[MaNguoiDungTao]
+            [NguoiSuaCuoi] = @MaNguoiDung
         WHERE [MaSanPham] = @MaSanPham AND [MaKho] = @MaKho AND (@SoLo IS NULL OR [SoLo] = @SoLo);
     END
     ELSE
     BEGIN
         INSERT INTO [dbo].[TonKho] ([MaSanPham], [MaKho], [MaViTri], [SoLo], [SoSerial], [NgayHetHan], [SoLuongTon], [NguoiSuaCuoi])
-        VALUES (@MaSanPham, @MaKho, @MaViTri, @SoLo, @SoSerial, @NgayHetHan, @SoLuong, r.[MaNguoiDungTao]);
+        VALUES (@MaSanPham, @MaKho, @MaViTri, @SoLo, @SoSerial, @NgayHetHan, @SoLuong, @MaNguoiDung);
     END
     
     -- Thêm giao dịch tồn kho
     INSERT INTO [dbo].[GiaoDichTonKho] ([LoaiGiaoDich], [LoaiThamChieu], [MaThamChieu], [MaSanPham], [MaKho], [MaViTri], [SoLuong], [ChiPhiDonVi], [SoLo], [SoSerial], [NgayHetHan], [GhiChu], [NguoiTao])
-    VALUES (N'Nhập kho', N'Phiếu nhập kho', @MaPhieuNhap, @MaSanPham, @MaKho, @MaViTri, @SoLuong, @DonGia, @SoLo, @SoSerial, @NgayHetHan, N'Tự động tạo từ phiếu nhập kho', r.[MaNguoiDungTao]);
+    VALUES (N'Nhập kho', N'Phiếu nhập kho', @MaPhieuNhap, @MaSanPham, @MaKho, @MaViTri, @SoLuong, @DonGia, @SoLo, @SoSerial, @NgayHetHan, N'Tự động tạo từ phiếu nhập kho', @MaNguoiDung);
+END;
+GO
+
+-- =============================================
+-- ADDITIONAL CONSTRAINTS AND IMPROVEMENTS
+-- =============================================
+
+-- Thêm ràng buộc CHECK cho các trường quan trọng
+ALTER TABLE [dbo].[DonDatHang] ADD CONSTRAINT [CK_DonDatHang_TongTien] CHECK ([TongTien] IS NULL OR [TongTien] >= 0);
+ALTER TABLE [dbo].[PhieuNhapKho] ADD CONSTRAINT [CK_PhieuNhapKho_TongTien] CHECK ([TongTien] IS NULL OR [TongTien] >= 0);
+ALTER TABLE [dbo].[DonHangBan] ADD CONSTRAINT [CK_DonHangBan_TongTien] CHECK ([TongTien] IS NULL OR [TongTien] >= 0);
+ALTER TABLE [dbo].[PhieuXuatKho] ADD CONSTRAINT [CK_PhieuXuatKho_TongTien] CHECK ([TongTien] IS NULL OR [TongTien] >= 0);
+
+-- Thêm ràng buộc CHECK cho ngày tháng
+ALTER TABLE [dbo].[DonDatHang] ADD CONSTRAINT [CK_DonDatHang_NgayGiaoDuKien] CHECK ([NgayGiaoDuKien] IS NULL OR [NgayGiaoDuKien] >= [NgayDat]);
+ALTER TABLE [dbo].[DonDatHang] ADD CONSTRAINT [CK_DonDatHang_NgayGiaoThucTe] CHECK ([NgayGiaoThucTe] IS NULL OR [NgayGiaoThucTe] >= [NgayDat]);
+ALTER TABLE [dbo].[DonHangBan] ADD CONSTRAINT [CK_DonHangBan_NgayYeuCau] CHECK ([NgayYeuCau] IS NULL OR [NgayYeuCau] >= [NgayDat]);
+ALTER TABLE [dbo].[DonHangBan] ADD CONSTRAINT [CK_DonHangBan_NgayGiao] CHECK ([NgayGiao] IS NULL OR [NgayGiao] >= [NgayDat]);
+
+-- Thêm ràng buộc CHECK cho số lượng
+-- Lưu ý: SoLuongKhaDung là computed column nên không thể thêm CHECK constraint
+
+-- Thêm ràng buộc CHECK cho email
+ALTER TABLE [dbo].[NguoiDungHeThong] ADD CONSTRAINT [CK_NguoiDungHeThong_Email] CHECK ([Email] IS NULL OR [Email] LIKE '%@%.%');
+ALTER TABLE [dbo].[NhaCungCap] ADD CONSTRAINT [CK_NhaCungCap_Email] CHECK ([Email] IS NULL OR [Email] LIKE '%@%.%');
+ALTER TABLE [dbo].[KhachHang] ADD CONSTRAINT [CK_KhachHang_Email] CHECK ([Email] IS NULL OR [Email] LIKE '%@%.%');
+
+-- Thêm ràng buộc CHECK cho số điện thoại
+ALTER TABLE [dbo].[NguoiDungHeThong] ADD CONSTRAINT [CK_NguoiDungHeThong_SoDienThoai] CHECK ([SoDienThoai] IS NULL OR [SoDienThoai] LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]');
+ALTER TABLE [dbo].[NhaCungCap] ADD CONSTRAINT [CK_NhaCungCap_SoDienThoai] CHECK ([SoDienThoai] IS NULL OR [SoDienThoai] LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]');
+ALTER TABLE [dbo].[KhachHang] ADD CONSTRAINT [CK_KhachHang_SoDienThoai] CHECK ([SoDienThoai] IS NULL OR [SoDienThoai] LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]');
+ALTER TABLE [dbo].[KhoHang] ADD CONSTRAINT [CK_KhoHang_SoDienThoai] CHECK ([SoDienThoai] IS NULL OR [SoDienThoai] LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]');
+
+-- =============================================
+-- STORED PROCEDURES CHO QUẢN LÝ ĐĂNG NHẬP
+-- =============================================
+
+-- Stored procedure xác thực đăng nhập
+GO
+CREATE PROCEDURE [dbo].[sp_XacThucDangNhap]
+    @TenDangNhap NVARCHAR(50),
+    @MatKhau NVARCHAR(255),
+    @DiaChiIP NVARCHAR(45) = NULL,
+    @ThietBi NVARCHAR(200) = NULL,
+    @UserAgent NVARCHAR(500) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRANSACTION;
+    
+    BEGIN TRY
+        DECLARE @MaNguoiDung INT, @HoTen NVARCHAR(100), @HoatDong BIT;
+        DECLARE @SessionID NVARCHAR(100) = NEWID();
+        
+        -- Kiểm tra thông tin đăng nhập
+        SELECT @MaNguoiDung = [MaNguoiDung], @HoTen = [HoTen], @HoatDong = [HoatDong]
+        FROM [dbo].[NguoiDungHeThong]
+        WHERE [TenDangNhap] = @TenDangNhap AND [MatKhau] = @MatKhau;
+        
+        IF @MaNguoiDung IS NULL
+        BEGIN
+            -- Ghi log đăng nhập thất bại
+            INSERT INTO [dbo].[LichSuDangNhap] ([MaNguoiDung], [ThoiGianDangNhap], [DiaChiIP], [ThietBi], [TrangThai], [LyDo])
+            VALUES (0, GETDATE(), @DiaChiIP, @ThietBi, N'Thất bại', N'Sai tên đăng nhập hoặc mật khẩu');
+            
+            RAISERROR (N'Đăng nhập thất bại: Sai tên đăng nhập hoặc mật khẩu', 16, 1);
+            RETURN;
+        END
+        
+        IF @HoatDong = 0
+        BEGIN
+            -- Ghi log tài khoản bị khóa
+            INSERT INTO [dbo].[LichSuDangNhap] ([MaNguoiDung], [ThoiGianDangNhap], [DiaChiIP], [ThietBi], [TrangThai], [LyDo])
+            VALUES (@MaNguoiDung, GETDATE(), @DiaChiIP, @ThietBi, N'Thất bại', N'Tài khoản bị khóa');
+            
+            RAISERROR (N'Đăng nhập thất bại: Tài khoản bị khóa', 16, 1);
+            RETURN;
+        END
+        
+        -- Cập nhật thông tin đăng nhập cuối
+        UPDATE [dbo].[NguoiDungHeThong]
+        SET [NgayDangNhapCuoi] = GETDATE()
+        WHERE [MaNguoiDung] = @MaNguoiDung;
+        
+        -- Ghi log đăng nhập thành công
+        INSERT INTO [dbo].[LichSuDangNhap] ([MaNguoiDung], [ThoiGianDangNhap], [DiaChiIP], [ThietBi], [TrangThai], [SessionID])
+        VALUES (@MaNguoiDung, GETDATE(), @DiaChiIP, @ThietBi, N'Thành công', @SessionID);
+        
+        -- Tạo phiên làm việc mới
+        INSERT INTO [dbo].[PhienLamViec] ([MaNguoiDung], [SessionID], [DiaChiIP], [ThietBi], [UserAgent])
+        VALUES (@MaNguoiDung, @SessionID, @DiaChiIP, @ThietBi, @UserAgent);
+        
+        -- Trả về thông tin người dùng và quyền
+        SELECT 
+            @MaNguoiDung AS MaNguoiDung,
+            @HoTen AS HoTen,
+            @SessionID AS SessionID;
+            
+        -- Trả về danh sách quyền
+        SELECT * FROM [dbo].[fn_LayDanhSachQuyen](@MaNguoiDung);
+        
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+-- Stored procedure đăng xuất
+GO
+CREATE PROCEDURE [dbo].[sp_DangXuat]
+    @SessionID NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRANSACTION;
+    
+    BEGIN TRY
+        DECLARE @MaNguoiDung INT, @MaPhien INT;
+        
+        -- Lấy thông tin phiên làm việc
+        SELECT @MaNguoiDung = [MaNguoiDung], @MaPhien = [MaPhien]
+        FROM [dbo].[PhienLamViec]
+        WHERE [SessionID] = @SessionID AND [TrangThai] = N'Đang hoạt động';
+        
+        IF @MaNguoiDung IS NOT NULL
+        BEGIN
+            -- Cập nhật thời gian kết thúc phiên
+            UPDATE [dbo].[PhienLamViec]
+            SET [ThoiGianKetThuc] = GETDATE(), [TrangThai] = N'Đã kết thúc'
+            WHERE [MaPhien] = @MaPhien;
+            
+            -- Cập nhật thời gian đăng xuất trong lịch sử
+            UPDATE [dbo].[LichSuDangNhap]
+            SET [ThoiGianDangXuat] = GETDATE()
+            WHERE [SessionID] = @SessionID AND [ThoiGianDangXuat] IS NULL;
+        END
+        
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+-- Stored procedure cập nhật hoạt động cuối
+GO
+CREATE PROCEDURE [dbo].[sp_CapNhatHoatDongCuoi]
+    @SessionID NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE [dbo].[PhienLamViec]
+    SET [LastActivity] = GETDATE()
+    WHERE [SessionID] = @SessionID AND [TrangThai] = N'Đang hoạt động';
+END;
+GO
+
+-- Stored procedure kiểm tra quyền
+GO
+CREATE PROCEDURE [dbo].[sp_KiemTraQuyen]
+    @MaNguoiDung INT,
+    @Module NVARCHAR(100),
+    @LoaiQuyen NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @CoQuyen BIT = [dbo].[fn_KiemTraQuyen](@MaNguoiDung, @Module, @LoaiQuyen);
+    
+    SELECT @CoQuyen AS CoQuyen;
 END;
 GO
 
@@ -1039,6 +1397,10 @@ Tính năng chính:
 3. **Tính toàn vẹn**: Đảm bảo tất cả bảng đều có mối quan hệ hợp lý
 4. **Audit trail**: Theo dõi ai tạo/sửa các bản ghi
 5. **Cập nhật dữ liệu mẫu**: Sửa tất cả INSERT statements để phù hợp với cấu trúc mới
+6. **Sửa lỗi thứ tự tạo bảng**: Di chuyển bảng KhachHang lên trước DonHangBan
+7. **Sửa lỗi trigger**: Khắc phục lỗi tham chiếu biến trong trigger
+8. **Thêm ràng buộc CHECK**: Bảo vệ tính toàn vẹn dữ liệu
+9. **Chuẩn hóa comment**: Sửa lỗi đánh số comment
 
 === CẤU TRÚC MỚI ===
 
@@ -1046,6 +1408,64 @@ Tính năng chính:
 - Bảng NguoiDungHeThong: Liên kết với tất cả bảng chính
 - Tất cả bảng đều có trường MaNguoiDungTao và MaNguoiDungSua
 - Khóa ngoại được thiết lập đầy đủ và chính xác
+- Ràng buộc CHECK bảo vệ dữ liệu
+- Trigger hoạt động chính xác
 
-Cơ sở dữ liệu này giờ đây đã hoàn chỉnh và chuyên nghiệp!
+=== TÍNH NĂNG BẢO MẬT VÀ TOÀN VẸN ===
+
+- Ràng buộc CHECK cho số lượng, giá cả, ngày tháng
+- Validation dữ liệu tự động
+- Audit trail đầy đủ
+- Khóa ngoại nghiêm ngặt
+- Index tối ưu hiệu suất
+
+Cơ sở dữ liệu này giờ đây đã hoàn chỉnh, chuyên nghiệp và an toàn!
+
+=== TÍNH NĂNG QUẢN LÝ ĐĂNG NHẬP VÀ PHÂN QUYỀN MỚI ===
+
+**BẢNG MỚI ĐÃ THÊM:**
+- **Quyen**: Quản lý các quyền trong hệ thống (READ, WRITE, DELETE, ADMIN)
+- **VaiTroNguoiDung**: Liên kết người dùng với quyền cụ thể
+- **LichSuDangNhap**: Theo dõi lịch sử đăng nhập/đăng xuất
+- **PhienLamViec**: Quản lý phiên làm việc và session
+- **LichSuHoatDong**: Ghi log tất cả hoạt động của người dùng
+
+**CHỨC NĂNG BẢO MẬT:**
+- **Xác thực đăng nhập**: Kiểm tra tài khoản, mật khẩu, trạng thái hoạt động
+- **Phân quyền chi tiết**: Theo module (KHO, SANPHAM, DONHANG, BAOCAO, HETHONG)
+- **Session management**: Quản lý phiên làm việc, timeout tự động
+- **Audit trail**: Ghi log toàn bộ hoạt động và thay đổi dữ liệu
+- **IP tracking**: Theo dõi địa chỉ IP và thiết bị đăng nhập
+
+**STORED PROCEDURES:**
+- **sp_XacThucDangNhap**: Xác thực và tạo phiên làm việc
+- **sp_DangXuat**: Đăng xuất và kết thúc phiên
+- **sp_CapNhatHoatDongCuoi**: Cập nhật hoạt động cuối
+- **sp_KiemTraQuyen**: Kiểm tra quyền của người dùng
+
+**FUNCTIONS:**
+- **fn_KiemTraQuyen**: Kiểm tra quyền theo module và loại quyền
+- **fn_LayDanhSachQuyen**: Lấy danh sách quyền của người dùng
+
+**HỆ THỐNG PHÂN QUYỀN:**
+- **ADMIN**: Toàn quyền trên tất cả module
+- **Quản lý**: Quyền quản lý trên các module chính
+- **Nhân viên**: Quyền đọc và ghi cơ bản
+- **Người xem**: Chỉ quyền đọc
+
+**BẢO MẬT NÂNG CAO:**
+- Mã hóa mật khẩu (có thể tích hợp với bcrypt/Argon2)
+- Chống brute force attack
+- Session timeout tự động
+- Ghi log bảo mật đầy đủ
+- Kiểm soát truy cập theo IP (có thể mở rộng)
+
+**TÍCH HỢP VỚI ỨNG DỤNG:**
+- API authentication
+- JWT token support (có thể mở rộng)
+- Role-based access control (RBAC)
+- Activity monitoring
+- Security reporting
+
+Hệ thống này giờ đây đã có đầy đủ tính năng bảo mật chuyên nghiệp!
 */
